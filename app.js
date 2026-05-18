@@ -57,7 +57,7 @@ function render(docs) {
     return;
   }
 
-  lista.innerHTML = [...docs].reverse().map(doc => {
+  lista.innerHTML = docs.map(doc => {
     const r = doc.data();
     const tipo = r.entrada > 0 ? "entrada" : "saida";
     const valor = r.entrada > 0 ? r.entrada : r.saida;
@@ -74,6 +74,8 @@ function render(docs) {
         </div>
       </div>`;
   }).join("");
+
+  lista.lastElementChild.scrollIntoView({ behavior: "smooth", block: "end" });
 }
 
 function deletar(id) {
