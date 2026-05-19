@@ -41,14 +41,20 @@ function render(docs) {
 
   docs.forEach(doc => {
     const r = doc.data();
-    totalE += r.entrada || 0;
-    totalS += r.saida || 0;
-    if (r.origem === "ANE") {
-      cefE += r.entrada || 0;
-      cefS += r.saida || 0;
-    } else if (r.origem === "JOAO") {
-      interE += r.entrada || 0;
-      interS += r.saida || 0;
+    if (r.origem === "ANE->JOAO") {
+      // transferência interna: saldo total inalterado, CEF cai, INTER sobe
+      cefS   += r.saida || 0;
+      interE += r.saida || 0;
+    } else {
+      totalE += r.entrada || 0;
+      totalS += r.saida || 0;
+      if (r.origem === "ANE") {
+        cefE += r.entrada || 0;
+        cefS += r.saida || 0;
+      } else if (r.origem === "JOAO") {
+        interE += r.entrada || 0;
+        interS += r.saida || 0;
+      }
     }
   });
 
@@ -76,14 +82,16 @@ function render(docs) {
 
   lista.innerHTML = docs.map(doc => {
     const r = doc.data();
-    const tipo = r.entrada > 0 ? "entrada" : "saida";
-    const valor = r.entrada > 0 ? r.entrada : r.saida;
+    const isTransf = r.origem === "ANE->JOAO";
+    const tipo  = isTransf ? "transferencia" : (r.entrada > 0 ? "entrada" : "saida");
+    const valor = isTransf ? r.saida : (r.entrada > 0 ? r.entrada : r.saida);
+    const prefix = isTransf ? "⇄" : (tipo === "entrada" ? "+" : "−");
     return `
       <div class="card ${tipo}">
         <button class="btn-del" onclick="deletar('${doc.id}')" title="Excluir">✕</button>
         <div class="card-top">
           <div class="card-desc">${escHtml(r.descricao)}</div>
-          <div class="card-valor ${tipo}">${tipo === "entrada" ? "+" : "−"} ${fmtMoeda(valor)}</div>
+          <div class="card-valor ${tipo}">${prefix} ${fmtMoeda(valor)}</div>
         </div>
         <div class="card-meta">
           <span>${escHtml(r.data)}</span>
@@ -142,6 +150,15 @@ document.getElementById("form").addEventListener("submit", function(e) {
 });
 
 document.getElementById("f-data").value = hoje();
+
+document.getElementById("f-origem").addEventListener("change", function() {
+  const desc = document.getElementById("f-desc");
+  if (this.value === "ANE->JOAO") {
+    desc.value = "Transferência Pix: CEF -> INTER";
+  } else if (desc.value === "Transferência Pix: CEF -> INTER") {
+    desc.value = "";
+  }
+});
 
 function toggleForm() {
   const form = document.getElementById("form");

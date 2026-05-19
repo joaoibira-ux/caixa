@@ -134,8 +134,9 @@ input:focus, select:focus {
   border-left: 4px solid #ccc;
   position: relative;
 }
-.card.entrada { border-left-color: #4caf50; }
-.card.saida   { border-left-color: #f44336; }
+.card.entrada      { border-left-color: #4caf50; }
+.card.saida        { border-left-color: #f44336; }
+.card.transferencia{ border-left-color: #7b1fa2; }
 
 .card-top {
   display: flex;
@@ -145,8 +146,9 @@ input:focus, select:focus {
 }
 .card-desc { font-size: 0.95rem; font-weight: 500; flex: 1; padding-right: 8px; }
 .card-valor { font-size: 1rem; font-weight: 700; white-space: nowrap; }
-.card-valor.entrada { color: #2e7d32; }
-.card-valor.saida   { color: #c62828; }
+.card-valor.entrada       { color: #2e7d32; }
+.card-valor.saida         { color: #c62828; }
+.card-valor.transferencia { color: #7b1fa2; }
 
 .card-meta {
   display: flex;
