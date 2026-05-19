@@ -17,7 +17,7 @@ body {
 header {
   background: #1976d2;
   color: white;
-  padding: 21px 16px;
+  padding: calc(env(safe-area-inset-top) + 16px) 16px 21px;
   font-size: 1.2rem;
   font-weight: 700;
   text-align: center;
