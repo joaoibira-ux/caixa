@@ -9,7 +9,7 @@
   <title>Caixa</title>
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <link rel="manifest" href="./manifest.json" />
-  <link rel="stylesheet" href="./style.css?v=11" />
+  <link rel="stylesheet" href="./style.css?v=12" />
 </head>
 <body>
 
@@ -34,10 +34,11 @@
     <div class="label">CEF (ANE)</div>
     <div class="value saldo-pos" id="tot-cef">R$ 0,00</div>
   </div>
-  <div class="item">
+  <div class="item inter-row">
     <div class="label">INTER (JOAO)</div>
     <div class="value saldo-pos" id="tot-inter">R$ 0,00</div>
   </div>
+  <button class="fab" id="fab" onclick="toggleForm()">+</button>
 </div>
 
 <form class="form-card" id="form" novalidate style="display:none">
@@ -70,7 +71,6 @@
   </div>
 </form>
 
-<button class="fab" id="fab" onclick="toggleForm()">+</button>
 <p class="section-title">Lançamentos</p>
 <div class="lancamentos" id="lista" style="padding-bottom: env(safe-area-inset-bottom)"></div>
 
