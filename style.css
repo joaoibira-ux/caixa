@@ -178,7 +178,7 @@ input:focus, select:focus {
 
 .fab {
   position: fixed;
-  bottom: calc(env(safe-area-inset-bottom) + 20px);
+  bottom: calc(env(safe-area-inset-bottom) + 6px);
   right: 20px;
   width: 56px;
   height: 56px;
