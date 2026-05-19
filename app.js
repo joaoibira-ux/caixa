@@ -35,11 +35,15 @@ function escHtml(s) {
     .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
 
+let docsCache = {};
+
 function render(docs) {
   const lista = document.getElementById("lista");
   let totalE = 0, totalS = 0, cefE = 0, cefS = 0, interE = 0, interS = 0;
+  docsCache = {};
 
   docs.forEach(doc => {
+    docsCache[doc.id] = doc.data();
     const r = doc.data();
     if (r.origem === "ANE->JOAO") {
       // transferência interna: saldo total inalterado, CEF cai, INTER sobe
@@ -103,9 +107,45 @@ function render(docs) {
   lista.lastElementChild.scrollIntoView({ behavior: "smooth", block: "end" });
 }
 
+let deletarId = null;
+
 function deletar(id) {
-  if (!confirm("Excluir este lançamento?")) return;
-  col.doc(id).delete();
+  const r = docsCache[id];
+  if (!r) return;
+  deletarId = id;
+
+  const isTransf = r.origem === "ANE->JOAO";
+  const valor = isTransf ? r.saida : (r.entrada > 0 ? r.entrada : r.saida);
+  const tipo  = isTransf ? "Transferência" : (r.entrada > 0 ? "Entrada" : "Saída");
+
+  document.getElementById("modal-detalhe").innerHTML = `
+    <div class="detalhe-linha"><span>Data</span><span>${escHtml(r.data)}</span></div>
+    <div class="detalhe-linha"><span>Origem</span><span>${escHtml(r.origem)}</span></div>
+    <div class="detalhe-linha"><span>Descrição</span><span>${escHtml(r.descricao)}</span></div>
+    <div class="detalhe-linha"><span>Tipo</span><span>${tipo}</span></div>
+    <div class="detalhe-linha"><span>Valor</span><span>${fmtMoeda(valor)}</span></div>
+  `;
+  document.getElementById("modal-senha").value = "";
+  document.getElementById("modal-erro").textContent = "";
+  document.getElementById("modal-del").style.display = "flex";
+  setTimeout(() => document.getElementById("modal-senha").focus(), 100);
+}
+
+function fecharModal() {
+  document.getElementById("modal-del").style.display = "none";
+  deletarId = null;
+}
+
+function confirmarDelete() {
+  const senha = document.getElementById("modal-senha").value;
+  if (senha !== "4512") {
+    document.getElementById("modal-erro").textContent = "Senha incorreta.";
+    document.getElementById("modal-senha").value = "";
+    document.getElementById("modal-senha").focus();
+    return;
+  }
+  col.doc(deletarId).delete();
+  fecharModal();
 }
 
 // Escuta em tempo real — atualiza os dois iPhones automaticamente
