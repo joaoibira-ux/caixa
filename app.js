@@ -144,7 +144,12 @@ function confirmarDelete() {
     document.getElementById("modal-senha").focus();
     return;
   }
-  col.doc(deletarId).delete();
+  const r = docsCache[deletarId];
+  db.collection("deletados").add({
+    ...r,
+    idOriginal: deletarId,
+    deletadoEm: firebase.firestore.FieldValue.serverTimestamp()
+  }).then(() => col.doc(deletarId).delete());
   fecharModal();
 }
 
