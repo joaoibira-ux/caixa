@@ -37,12 +37,19 @@ function escHtml(s) {
 
 function render(docs) {
   const lista = document.getElementById("lista");
-  let totalE = 0, totalS = 0;
+  let totalE = 0, totalS = 0, cefE = 0, cefS = 0, interE = 0, interS = 0;
 
   docs.forEach(doc => {
     const r = doc.data();
     totalE += r.entrada || 0;
     totalS += r.saida || 0;
+    if (r.origem === "ANE") {
+      cefE += r.entrada || 0;
+      cefS += r.saida || 0;
+    } else if (r.origem === "JOAO") {
+      interE += r.entrada || 0;
+      interS += r.saida || 0;
+    }
   });
 
   const saldo = totalE - totalS;
@@ -51,6 +58,16 @@ function render(docs) {
   const saldoEl = document.getElementById("tot-saldo");
   saldoEl.textContent = fmtMoeda(saldo);
   saldoEl.className = "value " + (saldo >= 0 ? "saldo-pos" : "saldo-neg");
+
+  const cef = cefE - cefS;
+  const cefEl = document.getElementById("tot-cef");
+  cefEl.textContent = fmtMoeda(cef);
+  cefEl.className = "value " + (cef >= 0 ? "saldo-pos" : "saldo-neg");
+
+  const inter = interE - interS;
+  const interEl = document.getElementById("tot-inter");
+  interEl.textContent = fmtMoeda(inter);
+  interEl.className = "value " + (inter >= 0 ? "saldo-pos" : "saldo-neg");
 
   if (docs.length === 0) {
     lista.innerHTML = '<p class="empty">Nenhum lançamento ainda.</p>';

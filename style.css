@@ -42,6 +42,19 @@ header {
 .totals .value.saldo-pos { color: #1565c0; }
 .totals .value.saldo-neg { color: #c62828; }
 
+.totals-sub {
+  display: flex;
+  justify-content: space-around;
+  background: #f0f4ff;
+  padding: 8px;
+  border-bottom: 1px solid #e0e0e0;
+  font-size: 0.82rem;
+  flex-shrink: 0;
+}
+.totals-sub .item { text-align: center; }
+.totals-sub .label { color: #777; font-size: 0.72rem; }
+.totals-sub .value { font-weight: 700; margin-top: 2px; }
+
 /* Form */
 .form-card {
   background: #fff;
