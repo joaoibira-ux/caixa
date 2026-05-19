@@ -131,7 +131,7 @@ document.getElementById("form").addEventListener("submit", function(e) {
   document.getElementById("f-desc").value = "";
   document.getElementById("f-entrada").value = "";
   document.getElementById("f-saida").value = "";
-  document.getElementById("f-desc").focus();
+  toggleForm();
 });
 
 ["f-entrada", "f-saida"].forEach(id => {
@@ -142,6 +142,15 @@ document.getElementById("form").addEventListener("submit", function(e) {
 });
 
 document.getElementById("f-data").value = hoje();
+
+function toggleForm() {
+  const form = document.getElementById("form");
+  const fab  = document.getElementById("fab");
+  const open = form.style.display === "none" || form.style.display === "";
+  form.style.display = open ? "block" : "none";
+  fab.classList.toggle("open", open);
+  if (open) document.getElementById("f-desc").focus();
+}
 
 // desativa service workers antigos para evitar cache travado
 if ("serviceWorker" in navigator) {

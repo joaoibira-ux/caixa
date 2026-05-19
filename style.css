@@ -176,6 +176,28 @@ input:focus, select:focus {
 }
 .btn-del:active { color: #f44336; }
 
+.fab {
+  position: fixed;
+  bottom: calc(env(safe-area-inset-bottom) + 20px);
+  right: 20px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #1976d2;
+  color: white;
+  border: none;
+  font-size: 2rem;
+  font-weight: 300;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  z-index: 100;
+  line-height: 56px;
+  text-align: center;
+  transition: background 0.15s, transform 0.2s;
+}
+.fab.open { background: #c62828; transform: rotate(45deg); }
+.fab:active { opacity: 0.85; }
+
 .empty {
   text-align: center;
   color: #aaa;

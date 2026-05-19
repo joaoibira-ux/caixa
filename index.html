@@ -9,7 +9,7 @@
   <title>Caixa</title>
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <link rel="manifest" href="./manifest.json" />
-  <link rel="stylesheet" href="./style.css?v=8" />
+  <link rel="stylesheet" href="./style.css?v=9" />
 </head>
 <body>
 
@@ -40,7 +40,7 @@
   </div>
 </div>
 
-<form class="form-card" id="form" novalidate>
+<form class="form-card" id="form" novalidate style="display:none">
   <h3>Novo lançamento</h3>
   <div class="form-grid">
     <div>
@@ -70,11 +70,12 @@
   </div>
 </form>
 
+<button class="fab" id="fab" onclick="toggleForm()">+</button>
 <p class="section-title">Lançamentos</p>
 <div class="lancamentos" id="lista" style="padding-bottom: env(safe-area-inset-bottom)"></div>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-<script src="./app.js?v=8"></script>
+<script src="./app.js?v=9"></script>
 </body>
 </html>
