@@ -118,7 +118,7 @@ input:focus, select:focus {
 }
 
 .lancamentos {
-  padding: 0 12px 16px;
+  padding: 0 12px 80px;
   flex: 1;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
@@ -178,7 +178,7 @@ input:focus, select:focus {
 
 .fab {
   position: fixed;
-  bottom: calc(env(safe-area-inset-bottom) + 6px);
+  bottom: calc(env(safe-area-inset-bottom) + 2px);
   right: 20px;
   width: 56px;
   height: 56px;
