@@ -152,9 +152,6 @@ function toggleForm() {
   if (open) document.getElementById("f-desc").focus();
 }
 
-// desativa service workers antigos para evitar cache travado
 if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.getRegistrations().then(regs => {
-    regs.forEach(r => r.unregister());
-  });
+  navigator.serviceWorker.register("./sw.js");
 }
