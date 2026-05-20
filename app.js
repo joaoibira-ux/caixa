@@ -198,24 +198,24 @@ document.getElementById("modal-senha").addEventListener("keydown", function(e) {
   if (e.key === "Enter") confirmarDelete();
 });
 
-document.getElementById("btn-cancelar").addEventListener("click", function(e) {
-  e.stopPropagation();
-  fecharModal();
-});
+function bindTap(id, fn) {
+  const el = document.getElementById(id);
+  el.addEventListener("touchend", function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    fn();
+  });
+  el.addEventListener("click", function(e) {
+    e.stopPropagation();
+    fn();
+  });
+}
 
-document.getElementById("btn-excluir").addEventListener("click", function(e) {
-  e.stopPropagation();
-  confirmarDelete();
-});
+bindTap("btn-cancelar", fecharModal);
+bindTap("btn-excluir", confirmarDelete);
 
-// fechar ao tocar no fundo cinza (fora do modal)
-document.getElementById("modal-del").addEventListener("click", function(e) {
-  if (e.target === this) fecharModal();
-});
-
-// impede que cliques dentro do modal fechem o modal
-document.querySelector(".modal").addEventListener("click", function(e) {
-  e.stopPropagation();
+document.getElementById("modal-del").addEventListener("touchend", function(e) {
+  if (e.target === this) { e.preventDefault(); fecharModal(); }
 });
 
 document.getElementById("f-data").value = hoje();
