@@ -127,12 +127,12 @@ function deletar(id) {
   `;
   document.getElementById("modal-senha").value = "";
   document.getElementById("modal-erro").textContent = "";
-  document.getElementById("modal-del").style.display = "flex";
+  document.getElementById("modal-del").classList.add("active");
   setTimeout(() => document.getElementById("modal-senha").focus(), 100);
 }
 
 function fecharModal() {
-  document.getElementById("modal-del").style.display = "none";
+  document.getElementById("modal-del").classList.remove("active");
   deletarId = null;
 }
 
@@ -192,6 +192,10 @@ document.getElementById("form").addEventListener("submit", function(e) {
     const v = parseMoeda(this.value);
     if (v > 0) this.value = v.toFixed(2).replace(".", ",");
   });
+});
+
+document.getElementById("modal-senha").addEventListener("keydown", function(e) {
+  if (e.key === "Enter") confirmarDelete();
 });
 
 document.getElementById("f-data").value = hoje();
