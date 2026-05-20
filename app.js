@@ -107,50 +107,28 @@ function render(docs) {
   lista.lastElementChild.scrollIntoView({ behavior: "smooth", block: "end" });
 }
 
-let deletarId = null;
-
 function deletar(id) {
   const r = docsCache[id];
   if (!r) return;
-  deletarId = id;
 
   const isTransf = r.origem === "ANE->JOAO";
   const valor = isTransf ? r.saida : (r.entrada > 0 ? r.entrada : r.saida);
   const tipo  = isTransf ? "Transferência" : (r.entrada > 0 ? "Entrada" : "Saída");
 
-  document.getElementById("modal-detalhe").innerHTML = `
-    <div class="detalhe-linha"><span>Data</span><span>${escHtml(r.data)}</span></div>
-    <div class="detalhe-linha"><span>Origem</span><span>${escHtml(r.origem)}</span></div>
-    <div class="detalhe-linha"><span>Descrição</span><span>${escHtml(r.descricao)}</span></div>
-    <div class="detalhe-linha"><span>Tipo</span><span>${tipo}</span></div>
-    <div class="detalhe-linha"><span>Valor</span><span>${fmtMoeda(valor)}</span></div>
-  `;
-  document.getElementById("modal-senha").value = "";
-  document.getElementById("modal-erro").textContent = "";
-  document.getElementById("modal-del").classList.add("active");
-  setTimeout(() => document.getElementById("modal-senha").focus(), 100);
-}
+  const info = `Data: ${r.data}\nOrigem: ${r.origem}\nDescrição: ${r.descricao}\n${tipo}: ${fmtMoeda(valor)}`;
+  const senha = prompt("EXCLUIR LANÇAMENTO?\n\n" + info + "\n\nDigite a senha:");
 
-function fecharModal() {
-  document.getElementById("modal-del").classList.remove("active");
-  deletarId = null;
-}
-
-function confirmarDelete() {
-  const senha = document.getElementById("modal-senha").value;
+  if (senha === null) return; // cancelou
   if (senha !== "4512") {
-    document.getElementById("modal-erro").textContent = "Senha incorreta.";
-    document.getElementById("modal-senha").value = "";
-    document.getElementById("modal-senha").focus();
+    alert("Senha incorreta. Nada foi excluído.");
     return;
   }
-  const r = docsCache[deletarId];
+
   db.collection("deletados").add({
     ...r,
-    idOriginal: deletarId,
+    idOriginal: id,
     deletadoEm: firebase.firestore.FieldValue.serverTimestamp()
-  }).then(() => col.doc(deletarId).delete());
-  fecharModal();
+  }).then(() => col.doc(id).delete());
 }
 
 // Escuta em tempo real — atualiza os dois iPhones automaticamente
@@ -194,29 +172,6 @@ document.getElementById("form").addEventListener("submit", function(e) {
   });
 });
 
-document.getElementById("modal-senha").addEventListener("keydown", function(e) {
-  if (e.key === "Enter") confirmarDelete();
-});
-
-function bindTap(id, fn) {
-  const el = document.getElementById(id);
-  el.addEventListener("touchend", function(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    fn();
-  });
-  el.addEventListener("click", function(e) {
-    e.stopPropagation();
-    fn();
-  });
-}
-
-bindTap("btn-cancelar", fecharModal);
-bindTap("btn-excluir", confirmarDelete);
-
-document.getElementById("modal-del").addEventListener("touchend", function(e) {
-  if (e.target === this) { e.preventDefault(); fecharModal(); }
-});
 
 document.getElementById("f-data").value = hoje();
 

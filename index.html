@@ -9,7 +9,7 @@
   <title>Caixa</title>
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <link rel="manifest" href="./manifest.json" />
-  <link rel="stylesheet" href="./style.css?v=17" />
+  <link rel="stylesheet" href="./style.css?v=18" />
 </head>
 <body>
 
@@ -72,25 +72,12 @@
   </div>
 </form>
 
-<div class="modal-overlay" id="modal-del">
-  <div class="modal">
-    <h3>Excluir lançamento?</h3>
-    <div class="modal-detalhe" id="modal-detalhe"></div>
-    <label for="modal-senha">Digite a senha para confirmar</label>
-    <input type="password" id="modal-senha" placeholder="••••" maxlength="4" inputmode="numeric" />
-    <p class="modal-erro" id="modal-erro"></p>
-    <div class="modal-btns">
-      <button type="button" id="btn-cancelar" class="btn-cancelar">Cancelar</button>
-      <button type="button" id="btn-excluir" class="btn-excluir">Excluir</button>
-    </div>
-  </div>
-</div>
 
 <p class="section-title">Lançamentos</p>
 <div class="lancamentos" id="lista" style="padding-bottom: env(safe-area-inset-bottom)"></div>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-<script src="./app.js?v=16"></script>
+<script src="./app.js?v=17"></script>
 </body>
 </html>
