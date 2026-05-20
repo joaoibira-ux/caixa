@@ -198,6 +198,26 @@ document.getElementById("modal-senha").addEventListener("keydown", function(e) {
   if (e.key === "Enter") confirmarDelete();
 });
 
+document.getElementById("btn-cancelar").addEventListener("click", function(e) {
+  e.stopPropagation();
+  fecharModal();
+});
+
+document.getElementById("btn-excluir").addEventListener("click", function(e) {
+  e.stopPropagation();
+  confirmarDelete();
+});
+
+// fechar ao tocar no fundo cinza (fora do modal)
+document.getElementById("modal-del").addEventListener("click", function(e) {
+  if (e.target === this) fecharModal();
+});
+
+// impede que cliques dentro do modal fechem o modal
+document.querySelector(".modal").addEventListener("click", function(e) {
+  e.stopPropagation();
+});
+
 document.getElementById("f-data").value = hoje();
 
 document.getElementById("f-origem").addEventListener("change", function() {
