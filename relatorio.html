@@ -302,6 +302,38 @@
       thead th       { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
     }
 
+    /* Overlay de rotação */
+    .rotate-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: #1a3322;
+      color: white;
+      z-index: 9999;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 40px;
+      gap: 16px;
+    }
+    .rotate-icon {
+      font-size: 4rem;
+      animation: spin 2s linear infinite;
+    }
+    @keyframes spin {
+      0%   { transform: rotate(0deg); }
+      25%  { transform: rotate(90deg); }
+      75%  { transform: rotate(90deg); }
+      100% { transform: rotate(180deg); }
+    }
+    .rotate-overlay h2 { font-size: 1.4rem; font-weight: 800; }
+    .rotate-overlay p  { font-size: 0.95rem; color: #a5d6a7; }
+
+    @media screen and (max-width: 768px) and (orientation: portrait) {
+      .rotate-overlay { display: flex; }
+    }
+
     @media (max-width: 768px) {
       /* Header */
       .header {
@@ -561,5 +593,11 @@
     el.className   = "saldo-total " + (saldo >= 0 ? "pos" : "neg");
   }
 </script>
+<div class="rotate-overlay" id="rotate-overlay">
+  <div class="rotate-icon">⟳</div>
+  <h2>Gire o dispositivo</h2>
+  <p>O relatório é melhor visualizado na horizontal.</p>
+</div>
+
 </body>
 </html>
