@@ -302,12 +302,54 @@
       thead th       { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
     }
 
-    @media (max-width: 640px) {
-      .header { padding: 16px; flex-direction: column; align-items: flex-start; }
-      .filtros { padding: 12px 16px; }
-      .resumo { padding: 16px 16px 8px; }
-      .tabela-wrap { margin: 8px 16px 24px; }
-      .header-right { width: 100%; display: flex; justify-content: space-between; align-items: center; }
+    @media (max-width: 768px) {
+      /* Header */
+      .header {
+        padding: 14px 16px;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+      .header-logo { height: 52px; }
+      .header-logo-placeholder { height: 52px; width: 52px; font-size: 1.3rem; }
+      .header-title h1 { font-size: 1.1rem; }
+      .header-right {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .header-right .data-geracao { font-size: 0.72rem; }
+
+      /* Filtros */
+      .filtros {
+        padding: 12px 16px;
+        gap: 10px;
+      }
+      .filtro-grupo input,
+      .filtro-grupo select { font-size: 0.85rem; padding: 7px 10px; }
+
+      /* Tabela: scroll horizontal */
+      .tabela-wrap {
+        margin: 8px 8px 24px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+      table { min-width: 580px; }
+
+      /* Título da tabela */
+      .tabela-titulo {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+        padding: 12px 14px;
+      }
+      .titulo-saldos {
+        width: 100%;
+        justify-content: flex-start;
+        gap: 20px;
+      }
+      .titulo-saldo-item { align-items: flex-start; }
+      .ts-valor { font-size: 0.9rem; }
     }
   </style>
 </head>
