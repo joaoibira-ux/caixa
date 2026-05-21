@@ -7,6 +7,9 @@ const firebaseConfig = {
   appId: "1:472820177992:web:2e1b98c9f6ac3a823d0c7d"
 };
 
+const VERSAO_CAIXA = "1.1";
+document.getElementById("versao-caixa").textContent = "Versão: " + VERSAO_CAIXA;
+
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const col = db.collection("lancamentos");
@@ -177,11 +180,11 @@ document.getElementById("f-data").value = hoje();
 
 document.getElementById("f-origem").addEventListener("change", function() {
   const desc = document.getElementById("f-desc");
-  const autoDescs = ["Transferência Pix: CEF -> INTER", "PAGAMENTO DE EMPRÉSTIMO HORACIO"];
+  const autoDescs = ["Transferência Pix: CEF -> INTER", "Transferência Pix: CEF -> HORÁCIO"];
   if (this.value === "ANE->JOAO") {
     desc.value = "Transferência Pix: CEF -> INTER";
   } else if (this.value === "ANE->HORACIO") {
-    desc.value = "PAGAMENTO DE EMPRÉSTIMO HORACIO";
+    desc.value = "Transferência Pix: CEF -> HORÁCIO";
   } else if (autoDescs.includes(desc.value)) {
     desc.value = "";
   }

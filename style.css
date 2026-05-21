@@ -23,6 +23,13 @@ header {
   text-align: center;
   flex-shrink: 0;
 }
+.header-versao {
+  font-size: 0.62rem;
+  font-weight: 400;
+  color: rgba(255,255,255,0.65);
+  margin-top: 2px;
+  letter-spacing: 0.05em;
+}
 
 /* Totals bar */
 .totals {
