@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Relatório do Caixa – Green Wall</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f0f5f0;
+      color: #1a2e1a;
+      min-height: 100vh;
+    }
+
+    /* ── HEADER ── */
+    .header {
+      background: linear-gradient(135deg, #1a3322 0%, #2d5a2d 100%);
+      color: white;
+      padding: 24px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    .header-logo {
+      height: 72px;
+      width: auto;
+    }
+    .header-logo-placeholder {
+      height: 72px;
+      width: 72px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+      font-weight: 900;
+      color: #4caf50;
+      letter-spacing: -2px;
+    }
+    .header-title h1 {
+      font-size: 1.5rem;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+    }
+    .header-title p {
+      font-size: 0.8rem;
+      color: #a5d6a7;
+      margin-top: 2px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    .header-right {
+      text-align: right;
+    }
+    .header-right .data-geracao {
+      font-size: 0.8rem;
+      color: #a5d6a7;
+      margin-bottom: 8px;
+    }
+    .btn-print {
+      background: #4caf50;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 20px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.15s;
+    }
+    .btn-print:hover { background: #388e3c; }
+
+    /* ── FILTROS ── */
+    .filtros {
+      background: white;
+      padding: 16px 32px;
+      border-bottom: 2px solid #c8e6c9;
+      display: flex;
+      gap: 16px;
+      align-items: flex-end;
+      flex-wrap: wrap;
+    }
+    .filtro-grupo {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .filtro-grupo label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: #388e3c;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .filtro-grupo input,
+    .filtro-grupo select {
+      padding: 8px 12px;
+      border: 1.5px solid #c8e6c9;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      color: #1a3322;
+      background: #f9fdf9;
+      outline: none;
+    }
+    .filtro-grupo input:focus,
+    .filtro-grupo select:focus { border-color: #4caf50; }
+    .btn-filtrar {
+      background: #1a3322;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 9px 20px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      height: 38px;
+      transition: background 0.15s;
+    }
+    .btn-filtrar:hover { background: #2d5a2d; }
+
+    /* ── CARDS RESUMO ── */
+    .resumo {
+      display: flex;
+      gap: 16px;
+      padding: 24px 32px 8px;
+      flex-wrap: wrap;
+    }
+    .card-resumo {
+      flex: 1;
+      min-width: 140px;
+      background: white;
+      border-radius: 12px;
+      padding: 16px 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+      border-top: 4px solid #ccc;
+    }
+    .card-resumo.entrada  { border-top-color: #4caf50; }
+    .card-resumo.saida    { border-top-color: #e53935; }
+    .card-resumo.saldo    { border-top-color: #1a3322; }
+    .card-resumo.cef      { border-top-color: #2196f3; }
+    .card-resumo.inter    { border-top-color: #ff9800; }
+    .card-resumo .cr-label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 6px;
+    }
+    .card-resumo .cr-valor {
+      font-size: 1.1rem;
+      font-weight: 800;
+    }
+    .card-resumo.entrada  .cr-valor { color: #2e7d32; }
+    .card-resumo.saida    .cr-valor { color: #c62828; }
+    .card-resumo.saldo    .cr-valor { color: #1a3322; }
+    .card-resumo.cef      .cr-valor { color: #1565c0; }
+    .card-resumo.inter    .cr-valor { color: #e65100; }
+
+    /* ── TABELA ── */
+    .tabela-wrap {
+      margin: 16px 32px 32px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+      overflow: hidden;
+    }
+    .tabela-titulo {
+      background: #1a3322;
+      color: white;
+      padding: 14px 20px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .tabela-titulo span { color: #a5d6a7; font-weight: 400; font-size: 0.78rem; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    thead th {
+      background: #2d5a2d;
+      color: white;
+      padding: 12px 14px;
+      text-align: left;
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      white-space: nowrap;
+    }
+    thead th.col-entrada { background: #1b5e20; }
+    thead th.col-saida   { background: #b71c1c; }
+    thead th.col-saldo   { background: #0d2e0d; }
+    tbody tr:nth-child(even) { background: #f9fdf9; }
+    tbody tr:hover { background: #e8f5e9; }
+    tbody td {
+      padding: 11px 14px;
+      font-size: 0.88rem;
+      border-bottom: 1px solid #e8f5e9;
+      vertical-align: middle;
+    }
+    .badge {
+      background: #e8f5e9;
+      color: #2e7d32;
+      border-radius: 4px;
+      padding: 2px 7px;
+      font-size: 0.72rem;
+      font-weight: 700;
+    }
+    .badge.joao { background: #fff3e0; color: #e65100; }
+    .badge.transf { background: #f3e5f5; color: #6a1b9a; }
+    .col-entrada-val {
+      color: #2e7d32;
+      font-weight: 700;
+      text-align: right;
+      white-space: nowrap;
+    }
+    .col-saida-val {
+      color: #c62828;
+      font-weight: 700;
+      text-align: right;
+      white-space: nowrap;
+    }
+    .col-saldo-val {
+      font-weight: 700;
+      text-align: right;
+      white-space: nowrap;
+    }
+    .col-saldo-val.pos { color: #1a3322; }
+    .col-saldo-val.neg { color: #c62828; }
+    td.vazio { color: #ccc; text-align: right; }
+
+    /* ── RODAPÉ TABELA ── */
+    tfoot td {
+      padding: 12px 14px;
+      font-weight: 800;
+      font-size: 0.92rem;
+      background: #1a3322;
+      color: white;
+      white-space: nowrap;
+    }
+    tfoot td.lbl { color: #a5d6a7; }
+    tfoot td.entrada-total { color: #81c784; text-align: right; }
+    tfoot td.saida-total   { color: #ef9a9a; text-align: right; }
+    tfoot td.saldo-total   { text-align: right; }
+    tfoot td.saldo-total.pos { color: #c8e6c9; }
+    tfoot td.saldo-total.neg { color: #ef9a9a; }
+
+    .empty-row td {
+      text-align: center;
+      color: #aaa;
+      padding: 40px;
+      font-size: 0.9rem;
+    }
+
+    /* ── PRINT ── */
+    @media print {
+      body { background: white; }
+      .filtros, .btn-print { display: none; }
+      .header { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+      thead th { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+      tfoot td { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+      .tabela-titulo { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+      .card-resumo { break-inside: avoid; }
+    }
+
+    @media (max-width: 640px) {
+      .header { padding: 16px; flex-direction: column; align-items: flex-start; }
+      .filtros { padding: 12px 16px; }
+      .resumo { padding: 16px 16px 8px; }
+      .tabela-wrap { margin: 8px 16px 24px; }
+      .header-right { width: 100%; display: flex; justify-content: space-between; align-items: center; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <img src="./logo-gw.png" alt="Green Wall" class="header-logo" onerror="this.style.display='none';document.querySelector('.header-logo-placeholder').style.display='flex'">
+    <div class="header-logo-placeholder" style="display:none">GW</div>
+    <div class="header-title">
+      <h1>Relatório do Caixa</h1>
+      <p>Green Wall – Revestimento Sustentável</p>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="data-geracao" id="data-geracao"></div>
+    <button class="btn-print" onclick="window.print()">🖨 Imprimir</button>
+  </div>
+</div>
+
+<div class="filtros">
+  <div class="filtro-grupo">
+    <label>De</label>
+    <input type="date" id="f-de" />
+  </div>
+  <div class="filtro-grupo">
+    <label>Até</label>
+    <input type="date" id="f-ate" />
+  </div>
+  <div class="filtro-grupo">
+    <label>Origem</label>
+    <select id="f-origem">
+      <option value="">Todas</option>
+      <option value="ANE">ANE</option>
+      <option value="JOAO">JOAO</option>
+      <option value="ANE->JOAO">Transferências</option>
+    </select>
+  </div>
+  <button class="btn-filtrar" onclick="aplicarFiltro()">Filtrar</button>
+  <button class="btn-filtrar" style="background:#4caf50" onclick="limparFiltro()">Limpar</button>
+</div>
+
+<div class="resumo">
+  <div class="card-resumo entrada">
+    <div class="cr-label">Total Entradas</div>
+    <div class="cr-valor" id="r-entrada">R$ 0,00</div>
+  </div>
+  <div class="card-resumo saida">
+    <div class="cr-label">Total Saídas</div>
+    <div class="cr-valor" id="r-saida">R$ 0,00</div>
+  </div>
+  <div class="card-resumo saldo">
+    <div class="cr-label">Saldo Geral</div>
+    <div class="cr-valor" id="r-saldo">R$ 0,00</div>
+  </div>
+  <div class="card-resumo cef">
+    <div class="cr-label">CEF (ANE)</div>
+    <div class="cr-valor" id="r-cef">R$ 0,00</div>
+  </div>
+  <div class="card-resumo inter">
+    <div class="cr-label">INTER (JOAO)</div>
+    <div class="cr-valor" id="r-inter">R$ 0,00</div>
+  </div>
+</div>
+
+<div class="tabela-wrap">
+  <div class="tabela-titulo">
+    Lançamentos <span id="total-registros"></span>
+  </div>
+  <table id="tabela">
+    <thead>
+      <tr>
+        <th>Data</th>
+        <th>Origem</th>
+        <th>Descrição</th>
+        <th class="col-entrada" style="text-align:right">Entrada (R$)</th>
+        <th class="col-saida" style="text-align:right">Saída (R$)</th>
+        <th class="col-saldo" style="text-align:right">Saldo Acum.</th>
+      </tr>
+    </thead>
+    <tbody id="tbody"></tbody>
+    <tfoot>
+      <tr>
+        <td colspan="3" class="lbl">TOTAIS</td>
+        <td class="entrada-total" id="f-total-entrada">R$ 0,00</td>
+        <td class="saida-total"  id="f-total-saida">R$ 0,00</td>
+        <td class="saldo-total"  id="f-total-saldo">R$ 0,00</td>
+      </tr>
+    </tfoot>
+  </table>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script>
+  firebase.initializeApp({
+    apiKey: "AIzaSyBaqROPsywPgtKjQU7cs1ke1WaqDFhWwn0",
+    authDomain: "sistema-gw-36566.firebaseapp.com",
+    projectId: "sistema-gw-36566",
+    storageBucket: "sistema-gw-36566.firebasestorage.app",
+    messagingSenderId: "472820177992",
+    appId: "1:472820177992:web:2e1b98c9f6ac3a823d0c7d"
+  });
+  const db = firebase.firestore();
+
+  function fmt(v) {
+    return "R$ " + (v||0).toFixed(2).replace(".", ",").replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  }
+
+  function parseDateBR(s) {
+    if (!s) return null;
+    const [d, m, y] = s.split("/");
+    return new Date(y, m - 1, d);
+  }
+
+  let todosOsDocs = [];
+
+  document.getElementById("data-geracao").textContent =
+    "Gerado em " + new Date().toLocaleDateString("pt-BR", { day:"2-digit", month:"long", year:"numeric", hour:"2-digit", minute:"2-digit" });
+
+  db.collection("lancamentos").orderBy("criadoEm", "asc").onSnapshot(snap => {
+    todosOsDocs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderTabela(todosOsDocs);
+  });
+
+  function aplicarFiltro() {
+    const de    = document.getElementById("f-de").value;
+    const ate   = document.getElementById("f-ate").value;
+    const orig  = document.getElementById("f-origem").value;
+
+    let filtrados = todosOsDocs.filter(r => {
+      const dataDoc = parseDateBR(r.data);
+      if (de  && dataDoc < new Date(de  + "T00:00:00")) return false;
+      if (ate && dataDoc > new Date(ate + "T23:59:59")) return false;
+      if (orig && r.origem !== orig) return false;
+      return true;
+    });
+    renderTabela(filtrados);
+  }
+
+  function limparFiltro() {
+    document.getElementById("f-de").value = "";
+    document.getElementById("f-ate").value = "";
+    document.getElementById("f-origem").value = "";
+    renderTabela(todosOsDocs);
+  }
+
+  function renderTabela(docs) {
+    const tbody = document.getElementById("tbody");
+    let totalE = 0, totalS = 0, cefE = 0, cefS = 0, interE = 0, interS = 0;
+    let saldoAcum = 0;
+
+    if (docs.length === 0) {
+      tbody.innerHTML = '<tr class="empty-row"><td colspan="6">Nenhum lançamento encontrado.</td></tr>';
+      atualizaResumo(0, 0, 0, 0, 0, 0);
+      document.getElementById("total-registros").textContent = "";
+      atualizaRodape(0, 0, 0);
+      return;
+    }
+
+    tbody.innerHTML = docs.map(r => {
+      const isTransf = r.origem === "ANE->JOAO";
+      const entrada  = isTransf ? 0 : (r.entrada || 0);
+      const saida    = isTransf ? 0 : (r.saida || 0);
+
+      if (!isTransf) {
+        totalE += entrada;
+        totalS += saida;
+        if (r.origem === "ANE")  { cefE += entrada; cefS += saida; }
+        if (r.origem === "JOAO") { interE += entrada; interS += saida; }
+        saldoAcum += entrada - saida;
+      } else {
+        cefS   += r.saida || 0;
+        interE += r.saida || 0;
+      }
+
+      const badgeCls = r.origem === "JOAO" ? "joao" : (isTransf ? "transf" : "");
+      const saldoCls = saldoAcum >= 0 ? "pos" : "neg";
+      const entradaCell = entrada > 0 ? `<td class="col-entrada-val">${fmt(entrada)}</td>` : `<td class="vazio">—</td>`;
+      const saidaCell   = saida   > 0 ? `<td class="col-saida-val">${fmt(saida)}</td>`     : `<td class="vazio">—</td>`;
+      const transCell   = isTransf
+        ? `<td class="col-saida-val" style="color:#6a1b9a">⇄ ${fmt(r.saida||0)}</td>`
+        : "";
+
+      if (isTransf) {
+        return `<tr>
+          <td>${r.data||""}</td>
+          <td><span class="badge transf">${r.origem}</span></td>
+          <td>${r.descricao||""}</td>
+          <td class="vazio">—</td>
+          ${transCell}
+          <td class="col-saldo-val ${saldoCls}">${fmt(saldoAcum)}</td>
+        </tr>`;
+      }
+
+      return `<tr>
+        <td>${r.data||""}</td>
+        <td><span class="badge ${badgeCls}">${r.origem}</span></td>
+        <td>${r.descricao||""}</td>
+        ${entradaCell}
+        ${saidaCell}
+        <td class="col-saldo-val ${saldoCls}">${fmt(saldoAcum)}</td>
+      </tr>`;
+    }).join("");
+
+    atualizaResumo(totalE, totalS, cefE, cefS, interE, interS);
+    atualizaRodape(totalE, totalS, totalE - totalS);
+    document.getElementById("total-registros").textContent = docs.length + " registro(s)";
+  }
+
+  function atualizaResumo(tE, tS, cE, cS, iE, iS) {
+    document.getElementById("r-entrada").textContent = fmt(tE);
+    document.getElementById("r-saida").textContent   = fmt(tS);
+    const saldo = tE - tS;
+    document.getElementById("r-saldo").textContent   = fmt(saldo);
+    document.getElementById("r-saldo").style.color   = saldo >= 0 ? "#1a3322" : "#c62828";
+    document.getElementById("r-cef").textContent     = fmt(cE - cS);
+    document.getElementById("r-inter").textContent   = fmt(iE - iS);
+  }
+
+  function atualizaRodape(tE, tS, saldo) {
+    document.getElementById("f-total-entrada").textContent = fmt(tE);
+    document.getElementById("f-total-saida").textContent   = fmt(tS);
+    const el = document.getElementById("f-total-saldo");
+    el.textContent = fmt(saldo);
+    el.className   = "saldo-total " + (saldo >= 0 ? "pos" : "neg");
+  }
+</script>
+</body>
+</html>
