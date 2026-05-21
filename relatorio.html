@@ -18,17 +18,12 @@
     .header {
       background: linear-gradient(135deg, #1a3322 0%, #2d5a2d 100%);
       color: white;
-      padding: 20px 32px 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-    }
-    .header-top {
+      padding: 24px 32px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 20px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
     }
     .header-left {
       display: flex;
@@ -88,21 +83,20 @@
     }
     .btn-print:hover { background: #388e3c; }
 
-    /* ── FILTROS ── */
+    /* ── FILTROS (dentro da barra escura da tabela) ── */
     .filtros {
       display: flex;
-      gap: 12px;
+      gap: 10px;
       align-items: flex-end;
       flex-wrap: wrap;
-      justify-content: center;
     }
     .filtro-grupo {
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 3px;
     }
     .filtro-grupo label {
-      font-size: 0.68rem;
+      font-size: 0.62rem;
       font-weight: 600;
       color: #a5d6a7;
       text-transform: uppercase;
@@ -110,31 +104,33 @@
     }
     .filtro-grupo input,
     .filtro-grupo select {
-      padding: 7px 11px;
-      border: 1.5px solid rgba(255,255,255,0.25);
-      border-radius: 8px;
-      font-size: 0.88rem;
+      padding: 5px 9px;
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 6px;
+      font-size: 0.82rem;
       color: #1a3322;
-      background: rgba(255,255,255,0.92);
+      background: rgba(255,255,255,0.9);
       outline: none;
+      height: 30px;
     }
     .filtro-grupo input:focus,
     .filtro-grupo select:focus { border-color: #4caf50; background: #fff; }
     .btn-filtrar {
       background: rgba(255,255,255,0.15);
       color: white;
-      border: 1.5px solid rgba(255,255,255,0.35);
-      border-radius: 8px;
-      padding: 7px 18px;
-      font-size: 0.88rem;
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 6px;
+      padding: 0 14px;
+      font-size: 0.82rem;
       font-weight: 600;
       cursor: pointer;
-      height: 36px;
+      height: 30px;
       transition: background 0.15s;
+      white-space: nowrap;
     }
     .btn-filtrar:hover { background: rgba(255,255,255,0.25); }
     .btn-filtrar.verde { background: #4caf50; border-color: #4caf50; }
-    .btn-filtrar.verde:hover { background: #388e3c; border-color: #388e3c; }
+    .btn-filtrar.verde:hover { background: #388e3c; }
 
     /* ── CARDS RESUMO ── */
     .resumo {
@@ -186,16 +182,14 @@
     .tabela-titulo {
       background: #1a3322;
       color: white;
-      padding: 14px 20px;
-      font-size: 0.85rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
+      padding: 10px 16px;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
     }
-    .tabela-titulo > span { color: #a5d6a7; font-weight: 400; font-size: 0.78rem; }
+    .tt-label { color: #a5d6a7; font-weight: 600; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; white-space: nowrap; }
     .titulo-saldos {
       display: flex;
       gap: 24px;
@@ -363,25 +357,24 @@
     @media (max-width: 768px) {
       /* Header */
       .header {
-        padding: 12px 16px 12px;
+        padding: 14px 16px;
+        flex-wrap: wrap;
         gap: 10px;
       }
-      .header-top { gap: 10px; }
       .header-logo { height: 52px; }
       .header-logo-placeholder { height: 52px; width: 52px; font-size: 1.3rem; }
       .header-title h1 { font-size: 1.1rem; }
       .header-right {
+        width: 100%;
         display: flex;
-        flex-direction: column;
-        align-items: flex-end;
-        gap: 6px;
+        justify-content: space-between;
+        align-items: center;
       }
       .header-right .data-geracao { font-size: 0.72rem; }
 
-      /* Filtros dentro do header */
+      /* Filtros na barra da tabela */
+      .tabela-titulo { flex-direction: column; align-items: flex-start; gap: 8px; }
       .filtros { gap: 8px; }
-      .filtro-grupo input,
-      .filtro-grupo select { font-size: 0.85rem; padding: 6px 9px; }
 
       /* Tabela: scroll horizontal */
       .tabela-wrap {
@@ -411,47 +404,44 @@
 <body>
 
 <div class="header">
-  <div class="header-top">
-    <div class="header-left">
-      <img src="./logo-gw.png.jpeg" alt="Green Wall" class="header-logo" onerror="this.style.display='none';document.querySelector('.header-logo-placeholder').style.display='flex'">
-      <div class="header-logo-placeholder" style="display:none">GW</div>
-      <div class="header-title">
-        <h1>Relatório do Caixa</h1>
-        <p id="versao-app"></p>
-      </div>
-    </div>
-    <div class="header-right">
-      <div class="data-geracao" id="data-geracao"></div>
-      <button class="btn-print" onclick="window.print()">🖨 Imprimir</button>
+  <div class="header-left">
+    <img src="./logo-gw.png.jpeg" alt="Green Wall" class="header-logo" onerror="this.style.display='none';document.querySelector('.header-logo-placeholder').style.display='flex'">
+    <div class="header-logo-placeholder" style="display:none">GW</div>
+    <div class="header-title">
+      <h1>Relatório do Caixa</h1>
+      <p id="versao-app"></p>
     </div>
   </div>
-  <div class="filtros">
-    <div class="filtro-grupo">
-      <label>De</label>
-      <input type="date" id="f-de" />
-    </div>
-    <div class="filtro-grupo">
-      <label>Até</label>
-      <input type="date" id="f-ate" />
-    </div>
-    <div class="filtro-grupo">
-      <label>Origem</label>
-      <select id="f-origem">
-        <option value="">Todas</option>
-        <option value="ANE">ANE</option>
-        <option value="JOAO">JOAO</option>
-        <option value="ANE->JOAO">Transferências</option>
-      </select>
-    </div>
-    <button class="btn-filtrar" onclick="aplicarFiltro()">Filtrar</button>
-    <button class="btn-filtrar verde" onclick="limparFiltro()">Limpar</button>
+  <div class="header-right">
+    <div class="data-geracao" id="data-geracao"></div>
+    <button class="btn-print" onclick="window.print()">🖨 Imprimir</button>
   </div>
 </div>
 
-
 <div class="tabela-wrap">
   <div class="tabela-titulo">
-    <span>Lançamentos <span id="total-registros"></span></span>
+    <span class="tt-label">Lançamentos <span id="total-registros"></span></span>
+    <div class="filtros">
+      <div class="filtro-grupo">
+        <label>De</label>
+        <input type="date" id="f-de" />
+      </div>
+      <div class="filtro-grupo">
+        <label>Até</label>
+        <input type="date" id="f-ate" />
+      </div>
+      <div class="filtro-grupo">
+        <label>Origem</label>
+        <select id="f-origem">
+          <option value="">Todas</option>
+          <option value="ANE">ANE</option>
+          <option value="JOAO">JOAO</option>
+          <option value="ANE->JOAO">Transferências</option>
+        </select>
+      </div>
+      <button class="btn-filtrar" onclick="aplicarFiltro()">Filtrar</button>
+      <button class="btn-filtrar verde" onclick="limparFiltro()">Limpar</button>
+    </div>
     <div class="titulo-saldos">
       <div class="titulo-saldo-item">
         <span class="ts-label">CEF (ANE)</span>
@@ -489,7 +479,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script>
-  const VERSAO = "1.2";
+  const VERSAO = "1.3";
   document.getElementById("versao-app").textContent = "Versão: " + VERSAO;
 
   firebase.initializeApp({
