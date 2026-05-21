@@ -7,7 +7,7 @@ const firebaseConfig = {
   appId: "1:472820177992:web:2e1b98c9f6ac3a823d0c7d"
 };
 
-const VERSAO_CAIXA = "1.2";
+const VERSAO_CAIXA = "1.3";
 document.getElementById("versao-caixa").textContent = "Versão: " + VERSAO_CAIXA;
 
 firebase.initializeApp(firebaseConfig);
@@ -89,10 +89,11 @@ function render(docs) {
 
   lista.innerHTML = docs.map(doc => {
     const r = doc.data();
-    const isTransf = r.origem === "ANE->JOAO";
-    const tipo  = isTransf ? "transferencia" : (r.entrada > 0 ? "entrada" : "saida");
-    const valor = isTransf ? r.saida : (r.entrada > 0 ? r.entrada : r.saida);
-    const prefix = isTransf ? "⇄" : (tipo === "entrada" ? "+" : "−");
+    const isTransfInter   = r.origem === "ANE->JOAO";
+    const isTransfHoracio = r.origem === "ANE->HORACIO";
+    const tipo   = (isTransfInter || isTransfHoracio) ? "transferencia" : (r.entrada > 0 ? "entrada" : "saida");
+    const valor  = (isTransfInter || isTransfHoracio) ? r.saida : (r.entrada > 0 ? r.entrada : r.saida);
+    const prefix = isTransfInter ? "⇄" : (tipo === "entrada" ? "+" : "−");
     return `
       <div class="card ${tipo}">
         <button class="btn-del" onclick="deletar('${doc.id}')" title="Excluir">✕</button>
