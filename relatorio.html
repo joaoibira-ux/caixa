@@ -508,13 +508,8 @@
   }
 
   function atualizaResumo(tE, tS, cE, cS, iE, iS) {
-    document.getElementById("r-entrada").textContent = fmt(tE);
-    document.getElementById("r-saida").textContent   = fmt(tS);
-    const saldo = tE - tS;
-    document.getElementById("r-saldo").textContent   = fmt(saldo);
-    document.getElementById("r-saldo").style.color   = saldo >= 0 ? "#1a3322" : "#c62828";
-    document.getElementById("r-cef").textContent     = fmt(cE - cS);
-    document.getElementById("r-inter").textContent   = fmt(iE - iS);
+    document.getElementById("r-cef").textContent   = fmt(cE - cS);
+    document.getElementById("r-inter").textContent = fmt(iE - iS);
   }
 
   function atualizaRodape(tE, tS, saldo) {
