@@ -296,11 +296,12 @@
     @media print {
       body { background: white; }
       .filtros, .btn-print { display: none; }
-      .header { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
-      thead th { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
-      tfoot td { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+      .header        { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
       .tabela-titulo { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
-      .card-resumo { break-inside: avoid; }
+      .row-totais td { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+      thead th       { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+      /* impede cabeçalho de colunas de repetir em cada página */
+      thead { display: table-row-group; }
     }
 
     @media (max-width: 640px) {
