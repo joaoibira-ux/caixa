@@ -190,7 +190,28 @@
       justify-content: space-between;
       align-items: center;
     }
-    .tabela-titulo span { color: #a5d6a7; font-weight: 400; font-size: 0.78rem; }
+    .tabela-titulo > span { color: #a5d6a7; font-weight: 400; font-size: 0.78rem; }
+    .titulo-saldos {
+      display: flex;
+      gap: 24px;
+    }
+    .titulo-saldo-item {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+    }
+    .ts-label {
+      font-size: 0.65rem;
+      color: #a5d6a7;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    .ts-valor {
+      font-size: 1rem;
+      font-weight: 800;
+      color: #ffffff;
+    }
     table {
       width: 100%;
       border-collapse: collapse;
@@ -333,7 +354,17 @@
 
 <div class="tabela-wrap">
   <div class="tabela-titulo">
-    Lançamentos <span id="total-registros"></span>
+    <span>Lançamentos <span id="total-registros"></span></span>
+    <div class="titulo-saldos">
+      <div class="titulo-saldo-item">
+        <span class="ts-label">CEF (ANE)</span>
+        <span class="ts-valor" id="r-cef">R$ 0,00</span>
+      </div>
+      <div class="titulo-saldo-item">
+        <span class="ts-label">INTER (JOAO)</span>
+        <span class="ts-valor" id="r-inter">R$ 0,00</span>
+      </div>
+    </div>
   </div>
   <table id="tabela">
     <thead>
