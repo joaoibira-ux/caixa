@@ -270,7 +270,7 @@
     td.vazio { color: #ccc; text-align: right; }
 
     /* ── RODAPÉ TABELA ── */
-    tfoot td {
+    .row-totais td {
       padding: 12px 14px;
       font-weight: 800;
       font-size: 0.92rem;
@@ -278,12 +278,12 @@
       color: white;
       white-space: nowrap;
     }
-    tfoot td.lbl { color: #a5d6a7; }
-    tfoot td.entrada-total { color: #81c784; text-align: right; }
-    tfoot td.saida-total   { color: #ef9a9a; text-align: right; }
-    tfoot td.saldo-total   { text-align: right; }
-    tfoot td.saldo-total.pos { color: #c8e6c9; }
-    tfoot td.saldo-total.neg { color: #ef9a9a; }
+    .row-totais td.lbl { color: #a5d6a7; }
+    .row-totais td.entrada-total { color: #81c784; text-align: right; }
+    .row-totais td.saida-total   { color: #ef9a9a; text-align: right; }
+    .row-totais td.saldo-total   { text-align: right; }
+    .row-totais td.saldo-total.pos { color: #c8e6c9; }
+    .row-totais td.saldo-total.neg { color: #ef9a9a; }
 
     .empty-row td {
       text-align: center;
@@ -378,14 +378,14 @@
       </tr>
     </thead>
     <tbody id="tbody"></tbody>
-    <tfoot>
-      <tr>
+    <tbody id="tbody-totais">
+      <tr class="row-totais">
         <td colspan="3" class="lbl">TOTAIS</td>
         <td class="entrada-total" id="f-total-entrada">R$ 0,00</td>
         <td class="saida-total"  id="f-total-saida">R$ 0,00</td>
         <td class="saldo-total"  id="f-total-saldo">R$ 0,00</td>
       </tr>
-    </tfoot>
+    </tbody>
   </table>
 </div>
 
