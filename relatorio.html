@@ -18,12 +18,17 @@
     .header {
       background: linear-gradient(135deg, #1a3322 0%, #2d5a2d 100%);
       color: white;
-      padding: 24px 32px;
+      padding: 20px 32px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+    .header-top {
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 20px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
     }
     .header-left {
       display: flex;
@@ -85,13 +90,11 @@
 
     /* ── FILTROS ── */
     .filtros {
-      background: white;
-      padding: 16px 32px;
-      border-bottom: 2px solid #c8e6c9;
       display: flex;
-      gap: 16px;
+      gap: 12px;
       align-items: flex-end;
       flex-wrap: wrap;
+      justify-content: center;
     }
     .filtro-grupo {
       display: flex;
@@ -99,37 +102,39 @@
       gap: 4px;
     }
     .filtro-grupo label {
-      font-size: 0.72rem;
+      font-size: 0.68rem;
       font-weight: 600;
-      color: #388e3c;
+      color: #a5d6a7;
       text-transform: uppercase;
       letter-spacing: 0.05em;
     }
     .filtro-grupo input,
     .filtro-grupo select {
-      padding: 8px 12px;
-      border: 1.5px solid #c8e6c9;
+      padding: 7px 11px;
+      border: 1.5px solid rgba(255,255,255,0.25);
       border-radius: 8px;
-      font-size: 0.9rem;
+      font-size: 0.88rem;
       color: #1a3322;
-      background: #f9fdf9;
+      background: rgba(255,255,255,0.92);
       outline: none;
     }
     .filtro-grupo input:focus,
-    .filtro-grupo select:focus { border-color: #4caf50; }
+    .filtro-grupo select:focus { border-color: #4caf50; background: #fff; }
     .btn-filtrar {
-      background: #1a3322;
+      background: rgba(255,255,255,0.15);
       color: white;
-      border: none;
+      border: 1.5px solid rgba(255,255,255,0.35);
       border-radius: 8px;
-      padding: 9px 20px;
-      font-size: 0.9rem;
+      padding: 7px 18px;
+      font-size: 0.88rem;
       font-weight: 600;
       cursor: pointer;
-      height: 38px;
+      height: 36px;
       transition: background 0.15s;
     }
-    .btn-filtrar:hover { background: #2d5a2d; }
+    .btn-filtrar:hover { background: rgba(255,255,255,0.25); }
+    .btn-filtrar.verde { background: #4caf50; border-color: #4caf50; }
+    .btn-filtrar.verde:hover { background: #388e3c; border-color: #388e3c; }
 
     /* ── CARDS RESUMO ── */
     .resumo {
@@ -358,28 +363,25 @@
     @media (max-width: 768px) {
       /* Header */
       .header {
-        padding: 14px 16px;
-        flex-wrap: wrap;
+        padding: 12px 16px 12px;
         gap: 10px;
       }
+      .header-top { gap: 10px; }
       .header-logo { height: 52px; }
       .header-logo-placeholder { height: 52px; width: 52px; font-size: 1.3rem; }
       .header-title h1 { font-size: 1.1rem; }
       .header-right {
-        width: 100%;
         display: flex;
-        justify-content: space-between;
-        align-items: center;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 6px;
       }
       .header-right .data-geracao { font-size: 0.72rem; }
 
-      /* Filtros */
-      .filtros {
-        padding: 12px 16px;
-        gap: 10px;
-      }
+      /* Filtros dentro do header */
+      .filtros { gap: 8px; }
       .filtro-grupo input,
-      .filtro-grupo select { font-size: 0.85rem; padding: 7px 10px; }
+      .filtro-grupo select { font-size: 0.85rem; padding: 6px 9px; }
 
       /* Tabela: scroll horizontal */
       .tabela-wrap {
@@ -409,40 +411,41 @@
 <body>
 
 <div class="header">
-  <div class="header-left">
-    <img src="./logo-gw.png.jpeg" alt="Green Wall" class="header-logo" onerror="this.style.display='none';document.querySelector('.header-logo-placeholder').style.display='flex'">
-    <div class="header-logo-placeholder" style="display:none">GW</div>
-    <div class="header-title">
-      <h1>Relatório do Caixa</h1>
-      <p id="versao-app"></p>
+  <div class="header-top">
+    <div class="header-left">
+      <img src="./logo-gw.png.jpeg" alt="Green Wall" class="header-logo" onerror="this.style.display='none';document.querySelector('.header-logo-placeholder').style.display='flex'">
+      <div class="header-logo-placeholder" style="display:none">GW</div>
+      <div class="header-title">
+        <h1>Relatório do Caixa</h1>
+        <p id="versao-app"></p>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="data-geracao" id="data-geracao"></div>
+      <button class="btn-print" onclick="window.print()">🖨 Imprimir</button>
     </div>
   </div>
-  <div class="header-right">
-    <div class="data-geracao" id="data-geracao"></div>
-    <button class="btn-print" onclick="window.print()">🖨 Imprimir</button>
+  <div class="filtros">
+    <div class="filtro-grupo">
+      <label>De</label>
+      <input type="date" id="f-de" />
+    </div>
+    <div class="filtro-grupo">
+      <label>Até</label>
+      <input type="date" id="f-ate" />
+    </div>
+    <div class="filtro-grupo">
+      <label>Origem</label>
+      <select id="f-origem">
+        <option value="">Todas</option>
+        <option value="ANE">ANE</option>
+        <option value="JOAO">JOAO</option>
+        <option value="ANE->JOAO">Transferências</option>
+      </select>
+    </div>
+    <button class="btn-filtrar" onclick="aplicarFiltro()">Filtrar</button>
+    <button class="btn-filtrar verde" onclick="limparFiltro()">Limpar</button>
   </div>
-</div>
-
-<div class="filtros">
-  <div class="filtro-grupo">
-    <label>De</label>
-    <input type="date" id="f-de" />
-  </div>
-  <div class="filtro-grupo">
-    <label>Até</label>
-    <input type="date" id="f-ate" />
-  </div>
-  <div class="filtro-grupo">
-    <label>Origem</label>
-    <select id="f-origem">
-      <option value="">Todas</option>
-      <option value="ANE">ANE</option>
-      <option value="JOAO">JOAO</option>
-      <option value="ANE->JOAO">Transferências</option>
-    </select>
-  </div>
-  <button class="btn-filtrar" onclick="aplicarFiltro()">Filtrar</button>
-  <button class="btn-filtrar" style="background:#4caf50" onclick="limparFiltro()">Limpar</button>
 </div>
 
 
@@ -486,7 +489,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script>
-  const VERSAO = "1.1";
+  const VERSAO = "1.2";
   document.getElementById("versao-app").textContent = "Versão: " + VERSAO;
 
   firebase.initializeApp({
