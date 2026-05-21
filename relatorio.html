@@ -410,11 +410,11 @@
 
 <div class="header">
   <div class="header-left">
-    <img src="./logo-gw.png" alt="Green Wall" class="header-logo" onerror="this.style.display='none';document.querySelector('.header-logo-placeholder').style.display='flex'">
+    <img src="./logo-gw.png.jpeg" alt="Green Wall" class="header-logo" onerror="this.style.display='none';document.querySelector('.header-logo-placeholder').style.display='flex'">
     <div class="header-logo-placeholder" style="display:none">GW</div>
     <div class="header-title">
       <h1>Relatório do Caixa</h1>
-      <p>Green Wall – Revestimento Sustentável</p>
+      <p id="versao-app"></p>
     </div>
   </div>
   <div class="header-right">
@@ -486,6 +486,9 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script>
+  const VERSAO = "relatorio-v1";
+  document.getElementById("versao-app").textContent = "Green Wall – " + VERSAO;
+
   firebase.initializeApp({
     apiKey: "AIzaSyBaqROPsywPgtKjQU7cs1ke1WaqDFhWwn0",
     authDomain: "sistema-gw-36566.firebaseapp.com",
@@ -513,6 +516,7 @@
 
   db.collection("lancamentos").orderBy("criadoEm", "asc").onSnapshot(snap => {
     todosOsDocs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    atualizaTotaisGlobais();
     renderTabela(todosOsDocs);
   });
 
@@ -549,6 +553,7 @@
       filtrados.push(r);
     });
 
+    atualizaTotaisGlobais();
     renderTabela(filtrados, temAnterior ? saldoAnterior : null);
   }
 
@@ -556,6 +561,7 @@
     document.getElementById("f-de").value = "";
     document.getElementById("f-ate").value = "";
     document.getElementById("f-origem").value = "";
+    atualizaTotaisGlobais();
     renderTabela(todosOsDocs);
   }
 
@@ -567,7 +573,6 @@
 
     if (docs.length === 0) {
       tbody.innerHTML = '<tr class="empty-row"><td colspan="6">Nenhum lançamento encontrado.</td></tr>';
-      atualizaResumo(0, 0, 0, 0, 0, 0);
       document.getElementById("total-registros").textContent = "";
       atualizaRodape(0, 0, base);
       return;
@@ -624,14 +629,26 @@
       </tr>`;
     }).join("");
 
-    atualizaResumo(totalE, totalS, cefE, cefS, interE, interS);
     atualizaRodape(totalE, totalS, base + totalE - totalS);
     document.getElementById("total-registros").textContent = docs.length + " registro(s)";
   }
 
-  function atualizaResumo(tE, tS, cE, cS, iE, iS) {
-    document.getElementById("r-cef").textContent   = fmt(cE - cS);
-    document.getElementById("r-inter").textContent = fmt(iE - iS);
+  function atualizaTotaisGlobais() {
+    let cefE = 0, cefS = 0, interE = 0, interS = 0;
+    todosOsDocs.forEach(r => {
+      if (r.origem === "ANE->JOAO") {
+        cefS   += r.saida || 0;
+        interE += r.saida || 0;
+      } else if (r.origem === "ANE") {
+        cefE += r.entrada || 0;
+        cefS += r.saida   || 0;
+      } else if (r.origem === "JOAO") {
+        interE += r.entrada || 0;
+        interS += r.saida   || 0;
+      }
+    });
+    document.getElementById("r-cef").textContent   = fmt(cefE - cefS);
+    document.getElementById("r-inter").textContent = fmt(interE - interS);
   }
 
   function atualizaRodape(tE, tS, saldo) {
