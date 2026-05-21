@@ -52,7 +52,7 @@ function render(docs) {
     } else {
       totalE += r.entrada || 0;
       totalS += r.saida || 0;
-      if (r.origem === "ANE") {
+      if (r.origem === "ANE" || r.origem === "ANE->HORACIO") {
         cefE += r.entrada || 0;
         cefS += r.saida || 0;
       } else if (r.origem === "JOAO") {
@@ -177,9 +177,12 @@ document.getElementById("f-data").value = hoje();
 
 document.getElementById("f-origem").addEventListener("change", function() {
   const desc = document.getElementById("f-desc");
+  const autoDescs = ["Transferência Pix: CEF -> INTER", "PAGAMENTO DE EMPRÉSTIMO HORACIO"];
   if (this.value === "ANE->JOAO") {
     desc.value = "Transferência Pix: CEF -> INTER";
-  } else if (desc.value === "Transferência Pix: CEF -> INTER") {
+  } else if (this.value === "ANE->HORACIO") {
+    desc.value = "PAGAMENTO DE EMPRÉSTIMO HORACIO";
+  } else if (autoDescs.includes(desc.value)) {
     desc.value = "";
   }
 });

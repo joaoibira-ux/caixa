@@ -437,6 +437,7 @@
           <option value="ANE">ANE</option>
           <option value="JOAO">JOAO</option>
           <option value="ANE->JOAO">Transferências</option>
+          <option value="ANE->HORACIO">ANE → HORACIO</option>
         </select>
       </div>
       <button class="btn-filtrar" onclick="aplicarFiltro()">Filtrar</button>
@@ -479,7 +480,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script>
-  const VERSAO = "1.5";
+  const VERSAO = "1.6";
   document.getElementById("versao-app").textContent = "Versão: " + VERSAO;
 
   firebase.initializeApp({
@@ -585,7 +586,7 @@
       if (!isTransf) {
         totalE += entrada;
         totalS += saida;
-        if (r.origem === "ANE")  { cefE += entrada; cefS += saida; }
+        if (r.origem === "ANE" || r.origem === "ANE->HORACIO")  { cefE += entrada; cefS += saida; }
         if (r.origem === "JOAO") { interE += entrada; interS += saida; }
         saldoAcum += entrada - saida;
       } else {
@@ -632,7 +633,7 @@
       if (r.origem === "ANE->JOAO") {
         cefS   += r.saida || 0;
         interE += r.saida || 0;
-      } else if (r.origem === "ANE") {
+      } else if (r.origem === "ANE" || r.origem === "ANE->HORACIO") {
         cefE += r.entrada || 0;
         cefS += r.saida   || 0;
       } else if (r.origem === "JOAO") {
