@@ -521,26 +521,35 @@
     const ate  = document.getElementById("f-ate").value;
     const orig = document.getElementById("f-origem").value;
 
-    let saldoAnterior = 0;
-    const dataInicio = de ? new Date(de + "T00:00:00") : null;
+    const dataInicio = de  ? new Date(de  + "T00:00:00") : null;
+    const dataFim    = ate ? new Date(ate + "T23:59:59")  : null;
 
-    let filtrados = todosOsDocs.filter(r => {
+    let saldoAnterior = 0;
+    let temAnterior   = false;
+    const filtrados   = [];
+
+    todosOsDocs.forEach(r => {
       const dataDoc = parseDateBR(r.data);
-      // docs antes do período: acumula saldo anterior
-      if (dataInicio && dataDoc < dataInicio) {
-        if (!orig || r.origem === orig) {
-          if (r.origem !== "ANE->JOAO") {
-            saldoAnterior += (r.entrada || 0) - (r.saida || 0);
-          }
+
+      // antes do início: acumula saldo anterior
+      if (dataInicio && dataDoc && dataDoc < dataInicio) {
+        temAnterior = true;
+        if (r.origem !== "ANE->JOAO") {
+          saldoAnterior += (r.entrada || 0) - (r.saida || 0);
         }
-        return false;
+        return;
       }
-      if (ate && dataDoc > new Date(ate + "T23:59:59")) return false;
-      if (orig && r.origem !== orig) return false;
-      return true;
+
+      // fora do período final: ignora
+      if (dataFim && dataDoc && dataDoc > dataFim) return;
+
+      // filtro de origem
+      if (orig && r.origem !== orig) return;
+
+      filtrados.push(r);
     });
 
-    renderTabela(filtrados, dataInicio ? saldoAnterior : 0);
+    renderTabela(filtrados, temAnterior ? saldoAnterior : null);
   }
 
   function limparFiltro() {
@@ -550,22 +559,23 @@
     renderTabela(todosOsDocs);
   }
 
-  function renderTabela(docs, saldoAnterior = 0) {
+  function renderTabela(docs, saldoAnterior = null) {
     const tbody = document.getElementById("tbody");
     let totalE = 0, totalS = 0, cefE = 0, cefS = 0, interE = 0, interS = 0;
-    let saldoAcum = saldoAnterior;
+    const base = saldoAnterior !== null ? saldoAnterior : 0;
+    let saldoAcum = base;
 
     if (docs.length === 0) {
       tbody.innerHTML = '<tr class="empty-row"><td colspan="6">Nenhum lançamento encontrado.</td></tr>';
       atualizaResumo(0, 0, 0, 0, 0, 0);
       document.getElementById("total-registros").textContent = "";
-      atualizaRodape(0, 0, 0);
+      atualizaRodape(0, 0, base);
       return;
     }
 
-    const rowAnterior = saldoAnterior !== 0 ? `
+    const rowAnterior = saldoAnterior !== null ? `
       <tr class="row-saldo-anterior">
-        <td colspan="5" class="sa-label">Saldo Anterior</td>
+        <td colspan="5" class="sa-label">Saldo Anterior ao Período</td>
         <td class="sa-valor ${saldoAnterior >= 0 ? 'pos' : 'neg'}">${fmt(saldoAnterior)}</td>
       </tr>` : "";
 
@@ -615,7 +625,7 @@
     }).join("");
 
     atualizaResumo(totalE, totalS, cefE, cefS, interE, interS);
-    atualizaRodape(totalE, totalS, totalE - totalS);
+    atualizaRodape(totalE, totalS, base + totalE - totalS);
     document.getElementById("total-registros").textContent = docs.length + " registro(s)";
   }
 
