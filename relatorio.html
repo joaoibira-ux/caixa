@@ -479,7 +479,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script>
-  const VERSAO = "1.3";
+  const VERSAO = "1.4";
   document.getElementById("versao-app").textContent = "Versão: " + VERSAO;
 
   firebase.initializeApp({
@@ -564,18 +564,18 @@
     const base = saldoAnterior !== null ? saldoAnterior : 0;
     let saldoAcum = base;
 
-    if (docs.length === 0) {
-      tbody.innerHTML = '<tr class="empty-row"><td colspan="6">Nenhum lançamento encontrado.</td></tr>';
-      document.getElementById("total-registros").textContent = "";
-      atualizaRodape(0, 0, base);
-      return;
-    }
-
     const rowAnterior = saldoAnterior !== null ? `
       <tr class="row-saldo-anterior">
         <td colspan="5" class="sa-label">Saldo Anterior ao Período</td>
         <td class="sa-valor ${saldoAnterior >= 0 ? 'pos' : 'neg'}">${fmt(saldoAnterior)}</td>
       </tr>` : "";
+
+    if (docs.length === 0) {
+      tbody.innerHTML = rowAnterior + '<tr class="empty-row"><td colspan="6">Nenhum lançamento no período selecionado.</td></tr>';
+      document.getElementById("total-registros").textContent = "0 registro(s)";
+      atualizaRodape(0, 0, base);
+      return;
+    }
 
     tbody.innerHTML = rowAnterior + docs.map(r => {
       const isTransf = r.origem === "ANE->JOAO";
