@@ -7,7 +7,8 @@ const firebaseConfig = {
   appId: "1:472820177992:web:2e1b98c9f6ac3a823d0c7d"
 };
 
-const VERSAO_CAIXA = "1.3";
+const VERSAO_CAIXA = "1.4";
+const HORACIO_BASE = -1136306.23;
 document.getElementById("versao-caixa").textContent = "Versão: " + VERSAO_CAIXA;
 
 firebase.initializeApp(firebaseConfig);
@@ -42,7 +43,7 @@ let docsCache = {};
 
 function render(docs) {
   const lista = document.getElementById("lista");
-  let totalE = 0, totalS = 0, cefE = 0, cefS = 0, interE = 0, interS = 0;
+  let totalE = 0, totalS = 0, cefE = 0, cefS = 0, interE = 0, interS = 0, horacioSaidas = 0;
   docsCache = {};
 
   docs.forEach(doc => {
@@ -58,6 +59,7 @@ function render(docs) {
       if (r.origem === "ANE" || r.origem === "ANE->HORACIO") {
         cefE += r.entrada || 0;
         cefS += r.saida || 0;
+        if (r.origem === "ANE->HORACIO") horacioSaidas += r.saida || 0;
       } else if (r.origem === "JOAO") {
         interE += r.entrada || 0;
         interS += r.saida || 0;
@@ -81,6 +83,11 @@ function render(docs) {
   const interEl = document.getElementById("tot-inter");
   interEl.textContent = fmtMoeda(inter);
   interEl.className = "value " + (inter >= 0 ? "saldo-pos" : "saldo-neg");
+
+  const horacio = HORACIO_BASE + horacioSaidas;
+  const horacioEl = document.getElementById("tot-horacio");
+  horacioEl.textContent = fmtMoeda(horacio);
+  horacioEl.className = "value " + (horacio >= 0 ? "saldo-pos" : "saldo-neg");
 
   if (docs.length === 0) {
     lista.innerHTML = '<p class="empty">Nenhum lançamento ainda.</p>';
