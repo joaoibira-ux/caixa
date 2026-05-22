@@ -436,7 +436,7 @@
           <option value="">Todas</option>
           <option value="ANE">ANE</option>
           <option value="JOAO">JOAO</option>
-          <option value="ANE->JOAO">Transferências</option>
+          <option value="ANE->GW-INTER">Transferências</option>
           <option value="ANE->HORACIO">ANE → HORACIO</option>
         </select>
       </div>
@@ -536,7 +536,7 @@
       // antes do início: acumula saldo anterior
       if (dataInicio && dataDoc && dataDoc < dataInicio) {
         temAnterior = true;
-        if (r.origem !== "ANE->JOAO") {
+        if (r.origem !== "ANE->GW-INTER") {
           saldoAnterior += (r.entrada || 0) - (r.saida || 0);
         }
         return;
@@ -583,7 +583,7 @@
     }
 
     tbody.innerHTML = rowAnterior + docs.map(r => {
-      const isTransf = r.origem === "ANE->JOAO";
+      const isTransf = r.origem === "ANE->GW-INTER";
       const entrada  = isTransf ? 0 : (r.entrada || 0);
       const saida    = isTransf ? 0 : (r.saida || 0);
 
@@ -636,7 +636,7 @@
   function atualizaTotaisGlobais() {
     let cefE = 0, cefS = 0, interE = 0, interS = 0, horacioSaidas = 0;
     todosOsDocs.forEach(r => {
-      if (r.origem === "ANE->JOAO") {
+      if (r.origem === "ANE->GW-INTER") {
         cefS   += r.saida || 0;
         interE += r.saida || 0;
       } else if (r.origem === "ANE->HORACIO") {

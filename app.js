@@ -7,7 +7,7 @@ const firebaseConfig = {
   appId: "1:472820177992:web:2e1b98c9f6ac3a823d0c7d"
 };
 
-const VERSAO_CAIXA = "1.6";
+const VERSAO_CAIXA = "1.7";
 const HORACIO_BASE = -136306.23;
 document.getElementById("versao-caixa").textContent = "Versão: " + VERSAO_CAIXA;
 
@@ -49,7 +49,7 @@ function render(docs) {
   docs.forEach(doc => {
     docsCache[doc.id] = doc.data();
     const r = doc.data();
-    if (r.origem === "ANE->JOAO") {
+    if (r.origem === "ANE->GW-INTER") {
       cefS   += r.saida || 0;
       interE += r.saida || 0;
     } else if (r.origem === "ANE->PROLABORE JOAO") {
@@ -102,7 +102,7 @@ function render(docs) {
 
   lista.innerHTML = docs.map(doc => {
     const r = doc.data();
-    const isTransfInter   = r.origem === "ANE->JOAO";
+    const isTransfInter   = r.origem === "ANE->GW-INTER";
     const isTransfHoracio = r.origem === "ANE->HORACIO";
     const tipo   = (isTransfInter || isTransfHoracio) ? "transferencia" : (r.entrada > 0 ? "entrada" : "saida");
     const valor  = (isTransfInter || isTransfHoracio) ? r.saida : (r.entrada > 0 ? r.entrada : r.saida);
@@ -128,7 +128,7 @@ function deletar(id) {
   const r = docsCache[id];
   if (!r) return;
 
-  const isTransf = r.origem === "ANE->JOAO";
+  const isTransf = r.origem === "ANE->GW-INTER";
   const valor = isTransf ? r.saida : (r.entrada > 0 ? r.entrada : r.saida);
   const tipo  = isTransf ? "Transferência" : (r.entrada > 0 ? "Entrada" : "Saída");
 
@@ -195,7 +195,7 @@ document.getElementById("f-data").value = hoje();
 document.getElementById("f-origem").addEventListener("change", function() {
   const desc = document.getElementById("f-desc");
   const autoDescs = ["Transferência Pix: CEF -> INTER", "Transferência Pix: CEF -> HORÁCIO", "Pró-labore JOAO: CEF -> JOAO"];
-  if (this.value === "ANE->JOAO") {
+  if (this.value === "ANE->GW-INTER") {
     desc.value = "Transferência Pix: CEF -> INTER";
   } else if (this.value === "ANE->HORACIO") {
     desc.value = "Transferência Pix: CEF -> HORÁCIO";
