@@ -7,7 +7,7 @@ const firebaseConfig = {
   appId: "1:472820177992:web:2e1b98c9f6ac3a823d0c7d"
 };
 
-const VERSAO_CAIXA = "2.1";
+const VERSAO_CAIXA = "2.2";
 const HORACIO_BASE = -136306.23;
 const JOAO_BASE = -32250;
 document.getElementById("versao-caixa").textContent = "Versão: " + VERSAO_CAIXA;
@@ -18,6 +18,9 @@ const col = db.collection("lancamentos");
 
 function fmtMoeda(v) {
   return "R$ " + v.toFixed(2).replace(".", ",").replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
+function fmtVal(v) {
+  return v.toFixed(2).replace(".", ",").replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 }
 
 function parseMoeda(s) {
@@ -79,22 +82,22 @@ function render(docs) {
 
   const cef = cefE - cefS;
   const cefEl = document.getElementById("tot-cef");
-  cefEl.textContent = fmtMoeda(cef);
+  cefEl.textContent = fmtVal(cef);
   cefEl.className = "value " + (cef >= 0 ? "saldo-pos" : "saldo-neg");
 
   const inter = interE - interS;
   const interEl = document.getElementById("tot-inter");
-  interEl.textContent = fmtMoeda(inter);
+  interEl.textContent = fmtVal(inter);
   interEl.className = "value " + (inter >= 0 ? "saldo-pos" : "saldo-neg");
 
   const joao = JOAO_BASE + joaoE;
   const joaoEl = document.getElementById("tot-joao");
-  joaoEl.textContent = fmtMoeda(joao);
+  joaoEl.textContent = fmtVal(joao);
   joaoEl.className = "value " + (joao >= 0 ? "saldo-pos" : "saldo-neg");
 
   const horacio = HORACIO_BASE + horacioSaidas;
   const horacioEl = document.getElementById("tot-horacio");
-  horacioEl.textContent = fmtMoeda(horacio);
+  horacioEl.textContent = fmtVal(horacio);
   horacioEl.className = "value " + (horacio >= 0 ? "saldo-pos" : "saldo-neg");
 
   if (docs.length === 0) {
