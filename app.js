@@ -7,7 +7,7 @@ const firebaseConfig = {
   appId: "1:472820177992:web:2e1b98c9f6ac3a823d0c7d"
 };
 
-const VERSAO_CAIXA = "1.5";
+const VERSAO_CAIXA = "1.6";
 const HORACIO_BASE = -136306.23;
 document.getElementById("versao-caixa").textContent = "Versão: " + VERSAO_CAIXA;
 
@@ -43,16 +43,18 @@ let docsCache = {};
 
 function render(docs) {
   const lista = document.getElementById("lista");
-  let totalE = 0, totalS = 0, cefE = 0, cefS = 0, interE = 0, interS = 0, horacioSaidas = 0;
+  let totalE = 0, totalS = 0, cefE = 0, cefS = 0, interE = 0, interS = 0, horacioSaidas = 0, joaoE = 0;
   docsCache = {};
 
   docs.forEach(doc => {
     docsCache[doc.id] = doc.data();
     const r = doc.data();
     if (r.origem === "ANE->JOAO") {
-      // transferência interna: saldo total inalterado, CEF cai, INTER sobe
       cefS   += r.saida || 0;
       interE += r.saida || 0;
+    } else if (r.origem === "ANE->PROLABORE JOAO") {
+      cefS  += r.saida || 0;
+      joaoE += r.saida || 0;
     } else {
       totalE += r.entrada || 0;
       totalS += r.saida || 0;
@@ -83,6 +85,10 @@ function render(docs) {
   const interEl = document.getElementById("tot-inter");
   interEl.textContent = fmtMoeda(inter);
   interEl.className = "value " + (inter >= 0 ? "saldo-pos" : "saldo-neg");
+
+  const joaoEl = document.getElementById("tot-joao");
+  joaoEl.textContent = fmtMoeda(joaoE);
+  joaoEl.className = "value " + (joaoE >= 0 ? "saldo-pos" : "saldo-neg");
 
   const horacio = HORACIO_BASE + horacioSaidas;
   const horacioEl = document.getElementById("tot-horacio");
@@ -188,11 +194,13 @@ document.getElementById("f-data").value = hoje();
 
 document.getElementById("f-origem").addEventListener("change", function() {
   const desc = document.getElementById("f-desc");
-  const autoDescs = ["Transferência Pix: CEF -> INTER", "Transferência Pix: CEF -> HORÁCIO"];
+  const autoDescs = ["Transferência Pix: CEF -> INTER", "Transferência Pix: CEF -> HORÁCIO", "Pró-labore JOAO: CEF -> JOAO"];
   if (this.value === "ANE->JOAO") {
     desc.value = "Transferência Pix: CEF -> INTER";
   } else if (this.value === "ANE->HORACIO") {
     desc.value = "Transferência Pix: CEF -> HORÁCIO";
+  } else if (this.value === "ANE->PROLABORE JOAO") {
+    desc.value = "Pró-labore JOAO: CEF -> JOAO";
   } else if (autoDescs.includes(desc.value)) {
     desc.value = "";
   }
