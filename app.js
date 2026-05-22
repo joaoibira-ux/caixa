@@ -7,7 +7,7 @@ const firebaseConfig = {
   appId: "1:472820177992:web:2e1b98c9f6ac3a823d0c7d"
 };
 
-const VERSAO_CAIXA = "1.9";
+const VERSAO_CAIXA = "2.0";
 const HORACIO_BASE = -136306.23;
 document.getElementById("versao-caixa").textContent = "Versão: " + VERSAO_CAIXA;
 
@@ -52,9 +52,6 @@ function render(docs) {
     if (r.origem === "ANE->GW-INTER") {
       cefS   += r.saida || 0;
       interE += r.saida || 0;
-    } else if (r.origem === "ANE->JOAO") {
-      cefS  += r.saida || 0;
-      joaoE += r.saida || 0;
     } else {
       totalE += r.entrada || 0;
       totalS += r.saida || 0;
@@ -65,6 +62,9 @@ function render(docs) {
       } else if (r.origem === "JOAO") {
         interE += r.entrada || 0;
         interS += r.saida || 0;
+      } else if (r.origem === "ANE->JOAO") {
+        cefS  += r.saida || 0;
+        joaoE += r.saida || 0;
       }
     }
   });
