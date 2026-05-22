@@ -7,7 +7,7 @@ const firebaseConfig = {
   appId: "1:472820177992:web:2e1b98c9f6ac3a823d0c7d"
 };
 
-const VERSAO_CAIXA = "1.9";
+const VERSAO_CAIXA = "1.8";
 const HORACIO_BASE = -136306.23;
 document.getElementById("versao-caixa").textContent = "Versão: " + VERSAO_CAIXA;
 
@@ -62,6 +62,9 @@ function render(docs) {
         cefE += r.entrada || 0;
         cefS += r.saida || 0;
         if (r.origem === "ANE->HORACIO") horacioSaidas += r.saida || 0;
+      } else if (r.origem === "JOAO") {
+        interE += r.entrada || 0;
+        interS += r.saida || 0;
       }
     }
   });
