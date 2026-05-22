@@ -7,7 +7,7 @@ const firebaseConfig = {
   appId: "1:472820177992:web:2e1b98c9f6ac3a823d0c7d"
 };
 
-const VERSAO_CAIXA = "1.8";
+const VERSAO_CAIXA = "1.9";
 const HORACIO_BASE = -136306.23;
 document.getElementById("versao-caixa").textContent = "Versão: " + VERSAO_CAIXA;
 
