@@ -7,8 +7,9 @@ const firebaseConfig = {
   appId: "1:472820177992:web:2e1b98c9f6ac3a823d0c7d"
 };
 
-const VERSAO_CAIXA = "2.0";
+const VERSAO_CAIXA = "2.1";
 const HORACIO_BASE = -136306.23;
+const JOAO_BASE = -32250;
 document.getElementById("versao-caixa").textContent = "Versão: " + VERSAO_CAIXA;
 
 firebase.initializeApp(firebaseConfig);
@@ -86,9 +87,10 @@ function render(docs) {
   interEl.textContent = fmtMoeda(inter);
   interEl.className = "value " + (inter >= 0 ? "saldo-pos" : "saldo-neg");
 
+  const joao = JOAO_BASE + joaoE;
   const joaoEl = document.getElementById("tot-joao");
-  joaoEl.textContent = fmtMoeda(joaoE);
-  joaoEl.className = "value " + (joaoE >= 0 ? "saldo-pos" : "saldo-neg");
+  joaoEl.textContent = fmtMoeda(joao);
+  joaoEl.className = "value " + (joao >= 0 ? "saldo-pos" : "saldo-neg");
 
   const horacio = HORACIO_BASE + horacioSaidas;
   const horacioEl = document.getElementById("tot-horacio");
