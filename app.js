@@ -7,7 +7,7 @@ const firebaseConfig = {
   appId: "1:472820177992:web:2e1b98c9f6ac3a823d0c7d"
 };
 
-const VERSAO_CAIXA = "1.7";
+const VERSAO_CAIXA = "1.8";
 const HORACIO_BASE = -136306.23;
 document.getElementById("versao-caixa").textContent = "Versão: " + VERSAO_CAIXA;
 
@@ -52,7 +52,7 @@ function render(docs) {
     if (r.origem === "ANE->GW-INTER") {
       cefS   += r.saida || 0;
       interE += r.saida || 0;
-    } else if (r.origem === "ANE->PROLABORE JOAO") {
+    } else if (r.origem === "ANE->JOAO") {
       cefS  += r.saida || 0;
       joaoE += r.saida || 0;
     } else {
@@ -199,7 +199,7 @@ document.getElementById("f-origem").addEventListener("change", function() {
     desc.value = "Transferência Pix: CEF -> INTER";
   } else if (this.value === "ANE->HORACIO") {
     desc.value = "Transferência Pix: CEF -> HORÁCIO";
-  } else if (this.value === "ANE->PROLABORE JOAO") {
+  } else if (this.value === "ANE->JOAO") {
     desc.value = "Pró-labore JOAO: CEF -> JOAO";
   } else if (autoDescs.includes(desc.value)) {
     desc.value = "";
