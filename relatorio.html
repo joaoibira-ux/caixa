@@ -453,7 +453,11 @@
         <span class="ts-valor" id="r-inter">R$ 0,00</span>
       </div>
       <div class="titulo-saldo-item">
-        <span class="ts-label">HORÁCIO</span>
+        <span class="ts-label">JOÃO ALBÉRICO</span>
+        <span class="ts-valor" id="r-joao">R$ 0,00</span>
+      </div>
+      <div class="titulo-saldo-item">
+        <span class="ts-label">HORÁCIO FORTE</span>
         <span class="ts-valor" id="r-horacio">R$ 0,00</span>
       </div>
     </div>
@@ -484,7 +488,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script>
-  const VERSAO = "1.7";
+  const VERSAO = "1.8";
   document.getElementById("versao-app").textContent = "Versão: " + VERSAO;
 
   firebase.initializeApp({
@@ -632,15 +636,19 @@
   }
 
   const HORACIO_BASE = -136306.23;
+  const JOAO_BASE    = -32250;
 
   function atualizaTotaisGlobais() {
-    let cefE = 0, cefS = 0, interE = 0, interS = 0, horacioSaidas = 0;
+    let cefE = 0, cefS = 0, interE = 0, interS = 0, horacioSaidas = 0, joaoE = 0;
     todosOsDocs.forEach(r => {
       if (r.origem === "ANE->GW-INTER") {
         cefS   += r.saida || 0;
         interE += r.saida || 0;
+      } else if (r.origem === "ANE->JOAO") {
+        cefS  += r.saida || 0;
+        joaoE += r.saida || 0;
       } else if (r.origem === "ANE->HORACIO") {
-        cefS         += r.saida || 0;
+        cefS          += r.saida || 0;
         horacioSaidas += r.saida || 0;
       } else if (r.origem === "ANE") {
         cefE += r.entrada || 0;
@@ -650,9 +658,12 @@
         interS += r.saida   || 0;
       }
     });
+    const joao    = JOAO_BASE + joaoE;
     const horacio = HORACIO_BASE + horacioSaidas;
     document.getElementById("r-cef").textContent     = fmt(cefE - cefS);
     document.getElementById("r-inter").textContent   = fmt(interE - interS);
+    document.getElementById("r-joao").textContent    = fmt(joao);
+    document.getElementById("r-joao").style.color    = joao    >= 0 ? "#ffffff" : "#ef9a9a";
     document.getElementById("r-horacio").textContent = fmt(horacio);
     document.getElementById("r-horacio").style.color = horacio >= 0 ? "#ffffff" : "#ef9a9a";
   }
