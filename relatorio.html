@@ -438,6 +438,7 @@
           <option value="JOAO">JOAO</option>
           <option value="ANE->GW-INTER">Transferências</option>
           <option value="ANE->HORACIO">ANE → HORACIO</option>
+          <option value="JOAO->HORACIO">JOÃO → HORÁCIO</option>
         </select>
       </div>
       <button class="btn-filtrar" onclick="aplicarFiltro()">Filtrar</button>
@@ -488,7 +489,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script>
-  const VERSAO = "1.8";
+  const VERSAO = "1.9";
   document.getElementById("versao-app").textContent = "Versão: " + VERSAO;
 
   firebase.initializeApp({
@@ -647,6 +648,9 @@
       } else if (r.origem === "ANE->JOAO") {
         cefS  += r.saida || 0;
         joaoE += r.saida || 0;
+      } else if (r.origem === "JOAO->HORACIO") {
+        interS        += r.saida || 0;
+        horacioSaidas += r.saida || 0;
       } else if (r.origem === "ANE->HORACIO") {
         cefS          += r.saida || 0;
         horacioSaidas += r.saida || 0;
