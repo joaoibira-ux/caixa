@@ -7,7 +7,7 @@ const firebaseConfig = {
   appId: "1:472820177992:web:2e1b98c9f6ac3a823d0c7d"
 };
 
-const VERSAO_CAIXA = "2.3";
+const VERSAO_CAIXA = "2.4";
 const HORACIO_BASE = -136306.23;
 const JOAO_BASE = -32250;
 document.getElementById("versao-caixa").textContent = "Versão: " + VERSAO_CAIXA;
@@ -44,11 +44,13 @@ function escHtml(s) {
 }
 
 let docsCache = {};
+let ultimoDocId = null;
 
 function render(docs) {
   const lista = document.getElementById("lista");
   let totalE = 0, totalS = 0, cefE = 0, cefS = 0, interE = 0, interS = 0, horacioSaidas = 0, joaoE = 0;
   docsCache = {};
+  ultimoDocId = docs.length > 0 ? docs[docs.length - 1].id : null;
 
   docs.forEach(doc => {
     docsCache[doc.id] = doc.data();
@@ -115,9 +117,12 @@ function render(docs) {
     const tipo   = (isTransfInter || isTransfHoracio) ? "transferencia" : (r.entrada > 0 ? "entrada" : "saida");
     const valor  = (isTransfInter || isTransfHoracio) ? r.saida : (r.entrada > 0 ? r.entrada : r.saida);
     const prefix = isTransfInter ? "⇄" : (tipo === "entrada" ? "+" : "−");
+    const btnDel = doc.id === ultimoDocId
+      ? `<button class="btn-del" onclick="deletar('${doc.id}')" title="Excluir">✕</button>`
+      : "";
     return `
       <div class="card ${tipo}">
-        <button class="btn-del" onclick="deletar('${doc.id}')" title="Excluir">✕</button>
+        ${btnDel}
         <div class="card-top">
           <div class="card-desc">${escHtml(r.descricao)}</div>
           <div class="card-valor ${tipo}">${prefix} ${fmtMoeda(valor)}</div>
@@ -133,6 +138,10 @@ function render(docs) {
 }
 
 function deletar(id) {
+  if (id !== ultimoDocId) {
+    alert("Só é possível excluir o lançamento mais recente.");
+    return;
+  }
   const r = docsCache[id];
   if (!r) return;
 
