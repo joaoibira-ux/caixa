@@ -489,7 +489,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script>
-  const VERSAO = "1.9";
+  const VERSAO = "1.10";
   document.getElementById("versao-app").textContent = "Versão: " + VERSAO;
 
   firebase.initializeApp({
@@ -508,6 +508,9 @@
 
   function parseDateBR(s) {
     if (!s) return null;
+    if (!s.includes("/") && s.length === 8) {
+      return new Date(s.slice(4), parseInt(s.slice(2, 4)) - 1, parseInt(s.slice(0, 2)));
+    }
     const [d, m, y] = s.split("/");
     return new Date(y, m - 1, d);
   }
