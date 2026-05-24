@@ -507,7 +507,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script>
-  const VERSAO = "1.11";
+  const VERSAO = "1.12";
   document.getElementById("versao-app").textContent = "Versão: " + VERSAO;
 
   firebase.initializeApp({
@@ -657,8 +657,9 @@
     document.getElementById("total-registros").textContent = docs.length + " registro(s)";
   }
 
-  const HORACIO_BASE = -136306.23;
-  const JOAO_BASE    = -32250;
+  const HORACIO_BASE  = -136306.23;
+  const JOAO_BASE     = -32250;
+  const RETENCAO_BASE = 4666.65;
 
   function atualizaTotaisGlobais() {
     let cefE = 0, cefS = 0, interE = 0, interS = 0, horacioSaidas = 0, joaoE = 0, retencaoE = 0;
@@ -694,7 +695,7 @@
     document.getElementById("r-joao").style.color    = joao    >= 0 ? "#ffffff" : "#ef9a9a";
     document.getElementById("r-horacio").textContent = fmt(horacio);
     document.getElementById("r-horacio").style.color = horacio >= 0 ? "#ffffff" : "#ef9a9a";
-    document.getElementById("r-retencao").textContent = fmt(retencaoE);
+    document.getElementById("r-retencao").textContent = fmt(RETENCAO_BASE + retencaoE);
   }
 
   function atualizaRodape(tE, tS, saldo) {
