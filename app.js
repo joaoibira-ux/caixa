@@ -7,7 +7,7 @@ const firebaseConfig = {
   appId: "1:472820177992:web:2e1b98c9f6ac3a823d0c7d"
 };
 
-const VERSAO_CAIXA = "2.4";
+const VERSAO_CAIXA = "2.5";
 const HORACIO_BASE = -136306.23;
 const JOAO_BASE = -32250;
 document.getElementById("versao-caixa").textContent = "Versão: " + VERSAO_CAIXA;
@@ -74,6 +74,8 @@ function render(docs) {
       } else if (r.origem === "JOAO->HORACIO") {
         interS        += r.saida || 0;
         horacioSaidas += r.saida || 0;
+      } else if (r.origem === "JOAO->RETENCAO PARADIGMA 5%") {
+        interS += r.saida || 0;
       }
     }
   });
@@ -220,6 +222,8 @@ document.getElementById("f-origem").addEventListener("change", function() {
     desc.value = "Pró-labore JOAO: CEF -> JOAO";
   } else if (this.value === "JOAO->HORACIO") {
     desc.value = "Transferência Pix: INTER -> HORÁCIO";
+  } else if (this.value === "JOAO->RETENCAO PARADIGMA 5%") {
+    desc.value = "Retenção 5% Paradigma";
   } else if (autoDescs.includes(desc.value)) {
     desc.value = "";
   }
