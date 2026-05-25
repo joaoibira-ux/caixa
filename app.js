@@ -7,14 +7,15 @@ const firebaseConfig = {
   appId: "1:472820177992:web:2e1b98c9f6ac3a823d0c7d"
 };
 
-const VERSAO_CAIXA = "2.5";
+const VERSAO_CAIXA = "2.6";
 const HORACIO_BASE = -136306.23;
 const JOAO_BASE = -32250;
 document.getElementById("versao-caixa").textContent = "Versão: " + VERSAO_CAIXA;
 
 firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-const col = db.collection("lancamentos");
+const db      = firebase.firestore();
+const col     = db.collection("lancamentos");
+const storage = firebase.storage();
 
 function fmtMoeda(v) {
   return "R$ " + v.toFixed(2).replace(".", ",").replace(/\B(?=(\d{3})+(?!\d))/g, ".");
@@ -167,9 +168,51 @@ function deletar(id) {
   }).then(() => col.doc(id).delete());
 }
 
+let backupFeito = false;
+
+function fazerBackupDiario(docs) {
+  if (backupFeito) return;
+  backupFeito = true;
+
+  const hoje   = new Date();
+  const chave  = `${hoje.getFullYear()}-${hoje.getMonth()}-${hoje.getDate()}`;
+  if (localStorage.getItem("caixa_lastBackup") === chave) return;
+
+  const ontem = new Date(hoje);
+  ontem.setDate(ontem.getDate() - 1);
+  const dd = String(ontem.getDate()).padStart(2, "0");
+  const mm = String(ontem.getMonth() + 1).padStart(2, "0");
+  const aa = String(ontem.getFullYear()).slice(-2);
+  const yyyy = String(ontem.getFullYear());
+  const nomeArquivo  = `${dd}${mm}${aa}.csv`;
+  const dataBR       = `${dd}/${mm}/${yyyy}`;
+  const dataSemBarra = `${dd}${mm}${yyyy}`;
+
+  const lancamentos = docs
+    .map(d => d.data())
+    .filter(r => r.data === dataBR || r.data === dataSemBarra);
+
+  localStorage.setItem("caixa_lastBackup", chave);
+  if (lancamentos.length === 0) return;
+
+  const bom  = "﻿";
+  const cab  = "Data;Origem;Descrição;Entrada (R$);Saída (R$)\n";
+  const rows = lancamentos.map(r =>
+    `${r.data};${r.origem};"${(r.descricao || "").replace(/"/g, '""')}";` +
+    `${(r.entrada || 0).toFixed(2).replace(".", ",")};` +
+    `${(r.saida   || 0).toFixed(2).replace(".", ",")}`
+  ).join("\n");
+
+  const csv = bom + cab + rows;
+  storage.ref(`Bkp/${nomeArquivo}`)
+    .putString(csv, "raw", { contentType: "text/csv;charset=utf-8" })
+    .catch(() => {});
+}
+
 // Escuta em tempo real — atualiza os dois iPhones automaticamente
 col.orderBy("criadoEm", "asc").onSnapshot(snapshot => {
   render(snapshot.docs);
+  fazerBackupDiario(snapshot.docs);
 }, err => {
   console.error(err);
   document.getElementById("lista").innerHTML =
