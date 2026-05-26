@@ -7,7 +7,7 @@ const firebaseConfig = {
   appId: "1:472820177992:web:2e1b98c9f6ac3a823d0c7d"
 };
 
-const VERSAO_CAIXA = "2.8";
+const VERSAO_CAIXA = "2.9";
 const HORACIO_BASE = -136306.23;
 const JOAO_BASE = -32250;
 document.getElementById("versao-caixa").textContent = "Versão: " + VERSAO_CAIXA;
@@ -169,21 +169,28 @@ function deletar(id) {
 
 let backupFeito = false;
 
-function fazerBackupDiario(docs) {
+async function fazerBackupDiario(docs) {
   if (backupFeito) return;
   backupFeito = true;
 
-  const hoje   = new Date();
-  const chave  = `${hoje.getFullYear()}-${hoje.getMonth()}-${hoje.getDate()}`;
-  if (localStorage.getItem("caixa_lastBackup") === chave) return;
+  const agora = new Date();
+  const chave = `${agora.getFullYear()}-${String(agora.getMonth()+1).padStart(2,"0")}-${String(agora.getDate()).padStart(2,"0")}`;
 
-  const ontem = new Date(hoje);
+  // Controle no Firestore — compartilhado entre todos os dispositivos
+  const configRef = db.collection("config").doc("backupDiario");
+  try {
+    const snap = await configRef.get();
+    if (snap.exists && snap.data().ultimaData === chave) return;
+    await configRef.set({ ultimaData: chave });
+  } catch(e) {
+    return;
+  }
+
+  const ontem = new Date(agora);
   ontem.setDate(ontem.getDate() - 1);
-  const dd = String(ontem.getDate()).padStart(2, "0");
-  const mm = String(ontem.getMonth() + 1).padStart(2, "0");
-  const aa = String(ontem.getFullYear()).slice(-2);
+  const dd   = String(ontem.getDate()).padStart(2, "0");
+  const mm   = String(ontem.getMonth() + 1).padStart(2, "0");
   const yyyy = String(ontem.getFullYear());
-  const nomeArquivo  = `${dd}${mm}${aa}.csv`;
   const dataBR       = `${dd}/${mm}/${yyyy}`;
   const dataSemBarra = `${dd}${mm}${yyyy}`;
 
@@ -191,7 +198,8 @@ function fazerBackupDiario(docs) {
     .map(d => d.data())
     .filter(r => r.data === dataBR || r.data === dataSemBarra);
 
-  // saldo inicial = tudo antes de ontem
+  if (lancamentos.length === 0) return;
+
   const todosData = docs.map(d => d.data());
   const saldoInicial = todosData
     .filter(r => r.data !== dataBR && r.data !== dataSemBarra)
@@ -199,9 +207,6 @@ function fazerBackupDiario(docs) {
       if (r.origem === "ANE->GW-INTER") return s;
       return s + (r.entrada || 0) - (r.saida || 0);
     }, 0);
-
-  localStorage.setItem("caixa_lastBackup", chave);
-  if (lancamentos.length === 0) return;
 
   const totalE = lancamentos.reduce((s, r) => s + (r.entrada || 0), 0);
   const totalS = lancamentos.reduce((s, r) => s + (r.saida   || 0), 0);
