@@ -7,7 +7,7 @@ const firebaseConfig = {
   appId: "1:472820177992:web:2e1b98c9f6ac3a823d0c7d"
 };
 
-const VERSAO_CAIXA = "2.6";
+const VERSAO_CAIXA = "2.7";
 const HORACIO_BASE = -136306.23;
 const JOAO_BASE = -32250;
 document.getElementById("versao-caixa").textContent = "Versão: " + VERSAO_CAIXA;
@@ -207,6 +207,30 @@ function fazerBackupDiario(docs) {
   storage.ref(`Bkp/${nomeArquivo}`)
     .putString(csv, "raw", { contentType: "text/csv;charset=utf-8" })
     .catch(() => {});
+
+  // Telegram
+  const totalE = lancamentos.reduce((s, r) => s + (r.entrada || 0), 0);
+  const totalS = lancamentos.reduce((s, r) => s + (r.saida   || 0), 0);
+  const saldo  = totalE - totalS;
+  const linhas = lancamentos.map(r => {
+    const val = r.entrada > 0
+      ? `+R$ ${r.entrada.toFixed(2).replace(".", ",")}`
+      : `-R$ ${r.saida.toFixed(2).replace(".", ",")}`;
+    return `• [${r.origem}] ${r.descricao}: ${val}`;
+  }).join("\n");
+
+  const msg =
+    `📋 *Caixa GW — ${dataBR}*\n\n` +
+    `${linhas}\n\n` +
+    `✅ Entradas: R$ ${totalE.toFixed(2).replace(".", ",")}\n` +
+    `❌ Saídas:   R$ ${totalS.toFixed(2).replace(".", ",")}\n` +
+    `💰 Saldo:    R$ ${saldo.toFixed(2).replace(".", ",")}`;
+
+  fetch(`https://api.telegram.org/bot7469790318:AAEFzcPeS_MG6vvmKrhiZjVWXv1m9J0PTk4/sendMessage`, {
+    method:  "POST",
+    headers: { "Content-Type": "application/json" },
+    body:    JSON.stringify({ chat_id: "1672059919", text: msg, parse_mode: "Markdown" })
+  }).catch(() => {});
 }
 
 // Escuta em tempo real — atualiza os dois iPhones automaticamente
