@@ -7,15 +7,14 @@ const firebaseConfig = {
   appId: "1:472820177992:web:2e1b98c9f6ac3a823d0c7d"
 };
 
-const VERSAO_CAIXA = "2.7";
+const VERSAO_CAIXA = "2.8";
 const HORACIO_BASE = -136306.23;
 const JOAO_BASE = -32250;
 document.getElementById("versao-caixa").textContent = "Versão: " + VERSAO_CAIXA;
 
 firebase.initializeApp(firebaseConfig);
-const db      = firebase.firestore();
-const col     = db.collection("lancamentos");
-const storage = firebase.storage();
+const db  = firebase.firestore();
+const col = db.collection("lancamentos");
 
 function fmtMoeda(v) {
   return "R$ " + v.toFixed(2).replace(".", ",").replace(/\B(?=(\d{3})+(?!\d))/g, ".");
@@ -192,39 +191,38 @@ function fazerBackupDiario(docs) {
     .map(d => d.data())
     .filter(r => r.data === dataBR || r.data === dataSemBarra);
 
+  // saldo inicial = tudo antes de ontem
+  const todosData = docs.map(d => d.data());
+  const saldoInicial = todosData
+    .filter(r => r.data !== dataBR && r.data !== dataSemBarra)
+    .reduce((s, r) => {
+      if (r.origem === "ANE->GW-INTER") return s;
+      return s + (r.entrada || 0) - (r.saida || 0);
+    }, 0);
+
   localStorage.setItem("caixa_lastBackup", chave);
   if (lancamentos.length === 0) return;
 
-  const bom  = "﻿";
-  const cab  = "Data;Origem;Descrição;Entrada (R$);Saída (R$)\n";
-  const rows = lancamentos.map(r =>
-    `${r.data};${r.origem};"${(r.descricao || "").replace(/"/g, '""')}";` +
-    `${(r.entrada || 0).toFixed(2).replace(".", ",")};` +
-    `${(r.saida   || 0).toFixed(2).replace(".", ",")}`
-  ).join("\n");
-
-  const csv = bom + cab + rows;
-  storage.ref(`Bkp/${nomeArquivo}`)
-    .putString(csv, "raw", { contentType: "text/csv;charset=utf-8" })
-    .catch(() => {});
-
-  // Telegram
   const totalE = lancamentos.reduce((s, r) => s + (r.entrada || 0), 0);
   const totalS = lancamentos.reduce((s, r) => s + (r.saida   || 0), 0);
-  const saldo  = totalE - totalS;
+  const saldoFinal = saldoInicial + totalE - totalS;
+
   const linhas = lancamentos.map(r => {
     const val = r.entrada > 0
       ? `+R$ ${r.entrada.toFixed(2).replace(".", ",")}`
-      : `-R$ ${r.saida.toFixed(2).replace(".", ",")}`;
+      : `-R$ ${(r.saida||0).toFixed(2).replace(".", ",")}`;
     return `• [${r.origem}] ${r.descricao}: ${val}`;
   }).join("\n");
 
+  const fmt = v => `R$ ${v.toFixed(2).replace(".", ",").replace(/\B(?=(\d{3})+(?!\d))/g, ".")}`;
+
   const msg =
     `📋 *Caixa GW — ${dataBR}*\n\n` +
+    `🏦 Saldo inicial: ${fmt(saldoInicial)}\n\n` +
     `${linhas}\n\n` +
-    `✅ Entradas: R$ ${totalE.toFixed(2).replace(".", ",")}\n` +
-    `❌ Saídas:   R$ ${totalS.toFixed(2).replace(".", ",")}\n` +
-    `💰 Saldo:    R$ ${saldo.toFixed(2).replace(".", ",")}`;
+    `✅ Entradas: ${fmt(totalE)}\n` +
+    `❌ Saídas:   ${fmt(totalS)}\n` +
+    `💰 Saldo final: ${fmt(saldoFinal)}`;
 
   fetch(`https://api.telegram.org/bot7469790318:AAEFzcPeS_MG6vvmKrhiZjVWXv1m9J0PTk4/sendMessage`, {
     method:  "POST",
