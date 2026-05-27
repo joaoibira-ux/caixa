@@ -7,7 +7,7 @@ const firebaseConfig = {
   appId: "1:472820177992:web:2e1b98c9f6ac3a823d0c7d"
 };
 
-const VERSAO_CAIXA = "2.9";
+const VERSAO_CAIXA = "3.0";
 const HORACIO_BASE = -136306.23;
 const JOAO_BASE = -32250;
 document.getElementById("versao-caixa").textContent = "Versão: " + VERSAO_CAIXA;
@@ -208,11 +208,15 @@ async function fazerBackupDiario(docs) {
       return s + (r.entrada || 0) - (r.saida || 0);
     }, 0);
 
-  const totalE = lancamentos.reduce((s, r) => s + (r.entrada || 0), 0);
-  const totalS = lancamentos.reduce((s, r) => s + (r.saida   || 0), 0);
+  const lancSemTransf = lancamentos.filter(r => r.origem !== "ANE->GW-INTER");
+  const totalE = lancSemTransf.reduce((s, r) => s + (r.entrada || 0), 0);
+  const totalS = lancSemTransf.reduce((s, r) => s + (r.saida   || 0), 0);
   const saldoFinal = saldoInicial + totalE - totalS;
 
   const linhas = lancamentos.map(r => {
+    if (r.origem === "ANE->GW-INTER") {
+      return `• [${r.origem}] ${r.descricao}: ⇄ R$ ${(r.saida||0).toFixed(2).replace(".", ",")}`;
+    }
     const val = r.entrada > 0
       ? `+R$ ${r.entrada.toFixed(2).replace(".", ",")}`
       : `-R$ ${(r.saida||0).toFixed(2).replace(".", ",")}`;
