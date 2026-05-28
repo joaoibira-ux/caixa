@@ -7,7 +7,7 @@ const firebaseConfig = {
   appId: "1:472820177992:web:2e1b98c9f6ac3a823d0c7d"
 };
 
-const VERSAO_CAIXA = "3.0";
+const VERSAO_CAIXA = "3.1";
 const HORACIO_BASE = -136306.23;
 const JOAO_BASE = -32250;
 document.getElementById("versao-caixa").textContent = "Versão: " + VERSAO_CAIXA;
@@ -43,8 +43,18 @@ function escHtml(s) {
     .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
 
-let docsCache = {};
-let ultimoDocId = null;
+let docsCache      = {};
+let ultimoDocId    = null;
+let folhaParaPagar = null;
+
+function nomeAbrev(nome) {
+  const n = (nome || "").toLowerCase();
+  if (n.includes("tratamento")) return "Tratamento";
+  if (n.includes("pasta"))      return "Gesso";
+  if (n.includes("emassamento") || n.includes("massa")) return "Massa";
+  if (n.includes("textura"))    return "Textura";
+  return (nome || "").substring(0, 10);
+}
 
 function render(docs) {
   const lista = document.getElementById("lista");
@@ -65,6 +75,8 @@ function render(docs) {
         cefE += r.entrada || 0;
         cefS += r.saida || 0;
         if (r.origem === "ANE->HORACIO") horacioSaidas += r.saida || 0;
+      } else if (r.origem === "ANE->FOLHA DE PAGAMENTO") {
+        cefS += r.saida || 0;
       } else if (r.origem === "JOAO") {
         interE += r.entrada || 0;
         interS += r.saida || 0;
@@ -267,11 +279,18 @@ document.getElementById("form").addEventListener("submit", function(e) {
     return;
   }
 
-  col.add({ data, origem, descricao: desc, entrada, saida, criadoEm: firebase.firestore.FieldValue.serverTimestamp() });
+  if (origem === "ANE->FOLHA DE PAGAMENTO") {
+    if (!folhaParaPagar) { alert("Folha não carregada. Selecione a origem novamente."); return; }
+    pagarFolha(data, desc, saida);
+  } else {
+    col.add({ data, origem, descricao: desc, entrada, saida, criadoEm: firebase.firestore.FieldValue.serverTimestamp() });
+  }
 
   document.getElementById("f-desc").value = "";
   document.getElementById("f-entrada").value = "";
   document.getElementById("f-saida").value = "";
+  document.getElementById("f-saida").readOnly = false;
+  folhaParaPagar = null;
   toggleForm();
 });
 
@@ -286,8 +305,14 @@ document.getElementById("form").addEventListener("submit", function(e) {
 document.getElementById("f-data").value = hoje();
 
 document.getElementById("f-origem").addEventListener("change", function() {
-  const desc = document.getElementById("f-desc");
-  const autoDescs = ["Transferência Pix: CEF -> INTER", "Transferência Pix: CEF -> HORÁCIO", "Pró-labore JOAO: CEF -> JOAO", "Transferência Pix: INTER -> HORÁCIO"];
+  const desc   = document.getElementById("f-desc");
+  const saida  = document.getElementById("f-saida");
+  const autoDescs = ["Transferência Pix: CEF -> INTER", "Transferência Pix: CEF -> HORÁCIO", "Pró-labore JOAO: CEF -> JOAO", "Transferência Pix: INTER -> HORÁCIO", "Folha de Pagamento da Produção"];
+
+  // Sempre reseta o campo saída ao trocar origem
+  saida.readOnly = false;
+  folhaParaPagar = null;
+
   if (this.value === "ANE->GW-INTER") {
     desc.value = "Transferência Pix: CEF -> INTER";
   } else if (this.value === "ANE->HORACIO") {
@@ -298,10 +323,79 @@ document.getElementById("f-origem").addEventListener("change", function() {
     desc.value = "Transferência Pix: INTER -> HORÁCIO";
   } else if (this.value === "JOAO->RETENCAO PARADIGMA 5%") {
     desc.value = "Retenção 5% Paradigma";
+  } else if (this.value === "ANE->FOLHA DE PAGAMENTO") {
+    desc.value = "Folha de Pagamento da Produção";
+    saida.value = "carregando...";
+    saida.readOnly = true;
+    db.collection("folhas").orderBy("criadoEm", "desc").limit(1).get().then(snap => {
+      if (snap.empty) { alert("Nenhuma folha encontrada."); saida.value = ""; return; }
+      const fdoc  = snap.docs[0];
+      const folha = fdoc.data();
+      if (folha.status === "paga") { alert("A última folha já foi paga."); saida.value = ""; return; }
+      folhaParaPagar = { id: fdoc.id, folha };
+      saida.value = (folha.totalGeral || 0).toFixed(2).replace(".", ",");
+    });
   } else if (autoDescs.includes(desc.value)) {
     desc.value = "";
   }
 });
+
+function pagarFolha(data, desc, saida) {
+  const { id: folhaId, folha } = folhaParaPagar;
+
+  // Lookup: "firestoreId:servico" → {funcionario, valor}
+  const lookup = new Map();
+  (folha.grupos || []).forEach(g => {
+    if (g.isEncarregado) return;
+    (g.itens || []).forEach(item => {
+      const entry = { funcionario: g.funcionario, valor: item.valor };
+      lookup.set(`${item.firestoreLocalId}:${item.servico}`,            entry);
+      lookup.set(`${item.firestoreLocalId}:${nomeAbrev(item.servico)}`, entry);
+    });
+  });
+
+  db.collection("locais").get().then(snap => {
+    const batch = db.batch();
+
+    // Lançamento no caixa
+    batch.set(col.doc(), {
+      data, origem: "ANE->FOLHA DE PAGAMENTO", descricao: desc,
+      entrada: 0, saida,
+      criadoEm: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    // Marca folha como paga
+    batch.update(db.collection("folhas").doc(folhaId), {
+      status:  "paga",
+      pagaEm:  firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    // Marca cada serviço amarelo como concluido
+    snap.docs.forEach(doc => {
+      const servicos  = doc.data().servicos || [];
+      const temAmarelo = servicos.some(s => s.status === "em_pagamento");
+      if (!temAmarelo) return;
+
+      const novos = servicos.map(s => {
+        if (s.status !== "em_pagamento") return s;
+        const found    = lookup.get(`${doc.id}:${s.nome}`) || lookup.get(`${doc.id}:${nomeAbrev(s.nome)}`) || {};
+        const executor = s.funcionario || found.funcionario || null;
+        return {
+          id:            s.id,
+          nome:          s.nome,
+          status:        "concluido",
+          executor:      executor ? { nome: executor.nome, id: executor.id || "" } : null,
+          valorPago:     found.valor || 0,
+          dataPagamento: data
+        };
+      });
+
+      batch.update(db.collection("locais").doc(doc.id), { servicos: novos });
+    });
+
+    batch.commit().catch(() => alert("Erro ao registrar pagamento. Tente novamente."));
+  });
+}
 
 function toggleForm() {
   const form = document.getElementById("form");
