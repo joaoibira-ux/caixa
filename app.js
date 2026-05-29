@@ -7,7 +7,7 @@ const firebaseConfig = {
   appId: "1:472820177992:web:2e1b98c9f6ac3a823d0c7d"
 };
 
-const VERSAO_CAIXA = "3.1";
+const VERSAO_CAIXA = "3.2";
 const HORACIO_BASE = -136306.23;
 const JOAO_BASE = -32250;
 document.getElementById("versao-caixa").textContent = "Versão: " + VERSAO_CAIXA;
@@ -405,6 +405,31 @@ function toggleForm() {
   fab.classList.toggle("open", open);
   if (open) document.getElementById("f-desc").focus();
 }
+
+// ── Previsão da Folha ──────────────────────────────────
+db.collection('folhas').orderBy('criadoEm', 'desc').limit(1).onSnapshot(snap => {
+  const el = document.getElementById('previsao-folha');
+  if (!el) return;
+  if (snap.empty) { el.innerHTML = ''; return; }
+  const folha = snap.docs[0].data();
+  if (folha.status === 'paga') { el.innerHTML = ''; return; }
+
+  const grupos = folha.grupos || [];
+  if (!grupos.length) { el.innerHTML = ''; return; }
+
+  const linhas = grupos.map(g => `
+    <div class="prev-linha${g.isEncarregado ? ' prev-enc' : ''}">
+      <div class="prev-nome">${escHtml(g.funcionario.nome)} <span class="prev-cargo">${escHtml(g.funcionario.cargo||'')}</span></div>
+      <div class="prev-valor">${fmtMoeda(g.subtotal)}</div>
+    </div>`).join('');
+
+  el.innerHTML = `
+    <div class="previsao-card">
+      <div class="prev-titulo">Previsão da Folha de Pagamento</div>
+      ${linhas}
+      <div class="prev-total"><span>Total</span><span>${fmtMoeda(folha.totalGeral || 0)}</span></div>
+    </div>`;
+});
 
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("./sw.js");
