@@ -7,7 +7,7 @@ const firebaseConfig = {
   appId: "1:472820177992:web:2e1b98c9f6ac3a823d0c7d"
 };
 
-const VERSAO_CAIXA = "3.4";
+const VERSAO_CAIXA = "3.5";
 const HORACIO_BASE = -136306.23;
 const JOAO_BASE = -32250;
 document.getElementById("versao-caixa").textContent = "Versão: " + VERSAO_CAIXA;
@@ -46,6 +46,7 @@ function escHtml(s) {
 let docsCache      = {};
 let ultimoDocId    = null;
 let folhaParaPagar = null;
+let descPrefix     = null;
 
 function nomeAbrev(nome) {
   const n = (nome || "").toLowerCase();
@@ -87,6 +88,8 @@ function render(docs) {
         interS        += r.saida || 0;
         horacioSaidas += r.saida || 0;
       } else if (r.origem === "ANE->RETENCAO PARADIGMA 5%") {
+        cefS += r.saida || 0;
+      } else if (r.origem === "ANE->ADIANTAMENTO") {
         cefS += r.saida || 0;
       }
     }
@@ -291,6 +294,7 @@ document.getElementById("form").addEventListener("submit", function(e) {
   document.getElementById("f-saida").value = "";
   document.getElementById("f-saida").readOnly = false;
   folhaParaPagar = null;
+  descPrefix = null;
   toggleForm();
 });
 
@@ -309,11 +313,16 @@ document.getElementById("f-origem").addEventListener("change", function() {
   const saida  = document.getElementById("f-saida");
   const autoDescs = ["Transferência Pix: CEF -> INTER", "Transferência Pix: CEF -> HORÁCIO", "Pró-labore JOAO: CEF -> JOAO", "Transferência Pix: INTER -> HORÁCIO", "Folha de Pagamento da Produção"];
 
-  // Sempre reseta o campo saída ao trocar origem
+  // Sempre reseta o campo saída e prefixo ao trocar origem
   saida.readOnly = false;
   folhaParaPagar = null;
+  descPrefix = null;
 
-  if (this.value === "ANE->GW-INTER") {
+  if (this.value === "ANE->ADIANTAMENTO") {
+    if (autoDescs.includes(desc.value)) desc.value = "";
+    abrirPickerFuncionario();
+    return;
+  } else if (this.value === "ANE->GW-INTER") {
     desc.value = "Transferência Pix: CEF -> INTER";
   } else if (this.value === "ANE->HORACIO") {
     desc.value = "Transferência Pix: CEF -> HORÁCIO";
@@ -337,6 +346,62 @@ document.getElementById("f-origem").addEventListener("change", function() {
     });
   } else if (autoDescs.includes(desc.value)) {
     desc.value = "";
+  }
+});
+
+function abrirPickerFuncionario() {
+  const overlay = document.getElementById("picker-overlay");
+  const lista   = document.getElementById("picker-lista");
+  lista.innerHTML = '<p style="color:#888;padding:12px;text-align:center">Carregando...</p>';
+  overlay.classList.add("active");
+  db.collection("funcionarios").orderBy("nome").get().then(snap => {
+    if (snap.empty) {
+      lista.innerHTML = '<p style="color:#888;padding:12px;text-align:center">Nenhum funcionário encontrado.</p>';
+      return;
+    }
+    lista.innerHTML = snap.docs.map(d => {
+      const f = d.data();
+      return `<div class="picker-item" data-nome="${escHtml(f.nome)}" onclick="selecionarFuncionario(this.dataset.nome)">
+        ${escHtml(f.nome)}<span class="picker-cargo-badge">${escHtml(f.cargo || "")}</span>
+      </div>`;
+    }).join("");
+  }).catch(() => {
+    lista.innerHTML = '<p style="color:#c62828;padding:12px;text-align:center">Erro ao carregar funcionários.</p>';
+  });
+}
+
+function fecharPicker() {
+  document.getElementById("picker-overlay").classList.remove("active");
+  if (!descPrefix) {
+    document.getElementById("f-origem").value = "";
+  }
+}
+
+function selecionarFuncionario(nome) {
+  document.getElementById("picker-overlay").classList.remove("active");
+  const desc = document.getElementById("f-desc");
+  descPrefix = "Adiantamento: " + nome + " — ";
+  desc.value = descPrefix;
+  desc.focus();
+  desc.setSelectionRange(descPrefix.length, descPrefix.length);
+}
+
+document.getElementById("f-desc").addEventListener("keydown", function(e) {
+  if (!descPrefix) return;
+  const pos = this.selectionStart;
+  if (e.key === "Backspace" && pos <= descPrefix.length) { e.preventDefault(); return; }
+  if (e.key === "Delete"    && pos < descPrefix.length)  { e.preventDefault(); return; }
+  if ((e.key === "ArrowLeft" || e.key === "Home") && pos <= descPrefix.length) {
+    e.preventDefault();
+    this.setSelectionRange(descPrefix.length, descPrefix.length);
+  }
+});
+
+document.getElementById("f-desc").addEventListener("input", function() {
+  if (!descPrefix) return;
+  if (!this.value.startsWith(descPrefix)) {
+    this.value = descPrefix;
+    this.setSelectionRange(descPrefix.length, descPrefix.length);
   }
 });
 
@@ -403,7 +468,11 @@ function toggleForm() {
   const open = form.style.display === "none" || form.style.display === "";
   form.style.display = open ? "block" : "none";
   fab.classList.toggle("open", open);
-  if (open) document.getElementById("f-desc").focus();
+  if (open) {
+    document.getElementById("f-desc").focus();
+  } else {
+    descPrefix = null;
+  }
 }
 
 

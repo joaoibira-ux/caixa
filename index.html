@@ -10,7 +10,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <link rel="manifest" href="./manifest.json" />
   <link rel="apple-touch-icon" href="./logo-gw.png.jpeg" />
-  <link rel="stylesheet" href="./style.css?v=24" />
+  <link rel="stylesheet" href="./style.css?v=25" />
 </head>
 <body>
 
@@ -72,6 +72,7 @@
         <option value="JOAO->HORACIO">JOÃO → HORÁCIO</option>
         <option value="ANE->RETENCAO PARADIGMA 5%">ANE → RETENÇÃO PARADIGMA 5%</option>
         <option value="ANE->FOLHA DE PAGAMENTO">ANE → FOLHA DE PAGAMENTO</option>
+        <option value="ANE->ADIANTAMENTO">ANE → Adiantamento</option>
       </select>
     </div>
     <div class="full">
@@ -96,6 +97,16 @@
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-<script src="./app.js?v=42"></script>
+<div class="modal-overlay" id="picker-overlay">
+  <div class="modal">
+    <h3 style="color:#1565c0;margin-bottom:12px">Adiantamento — Funcionário</h3>
+    <div id="picker-lista" style="max-height:300px;overflow-y:auto;border-radius:8px;border:1px solid #e0e0e0;margin-bottom:14px"></div>
+    <div class="modal-btns">
+      <button class="btn-cancelar" onclick="fecharPicker()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<script src="./app.js?v=43"></script>
 </body>
 </html>
