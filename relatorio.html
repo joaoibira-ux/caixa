@@ -67,8 +67,7 @@
       color: #a5d6a7;
       margin-bottom: 8px;
     }
-    .btn-print {
-      background: #4caf50;
+    .btn-print, .btn-telegram {
       color: white;
       border: none;
       border-radius: 8px;
@@ -81,7 +80,13 @@
       gap: 6px;
       transition: background 0.15s;
     }
+    .btn-print    { background: #4caf50; }
     .btn-print:hover { background: #388e3c; }
+    .btn-telegram { background: #1976d2; }
+    .btn-telegram:hover { background: #1251a0; }
+    .btn-telegram:disabled { background: #555; cursor: default; }
+    .header-btns  { display: flex; gap: 8px; }
+    @media print  { .btn-telegram { display: none !important; } }
 
     /* ── FILTROS (dentro da barra escura da tabela) ── */
     .filtros {
@@ -440,7 +445,10 @@
   </div>
   <div class="header-right">
     <div class="data-geracao" id="data-geracao"></div>
-    <button class="btn-print" onclick="window.print()">🖨 Imprimir</button>
+    <div class="header-btns">
+      <button class="btn-telegram" onclick="enviarTelegram(this)">📸 Telegram</button>
+      <button class="btn-print" onclick="window.print()">🖨 Imprimir</button>
+    </div>
   </div>
 </div>
 
@@ -519,10 +527,55 @@
 
 <div class="previsao-wrap" id="previsao-folha"></div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script>
-  const VERSAO = "1.17";
+  const VERSAO = "1.18";
+
+  async function enviarTelegram(btn) {
+    btn.disabled = true;
+    btn.textContent = '⏳ Capturando...';
+
+    // Esconde controles temporariamente
+    const ocultar = ['.filtros', '.btn-print', '.btn-telegram', '#rotate-overlay', '.header-right .data-geracao'];
+    const estados = ocultar.map(sel => {
+      const el = document.querySelector(sel);
+      const prev = el ? el.style.display : null;
+      if (el) el.style.display = 'none';
+      return { el, prev };
+    });
+
+    try {
+      const canvas = await html2canvas(document.body, {
+        scale: 1.6,
+        useCORS: true,
+        backgroundColor: '#f0f5f0',
+        scrollX: 0,
+        scrollY: -window.scrollY,
+        windowWidth: document.body.scrollWidth,
+        windowHeight: document.body.scrollHeight
+      });
+
+      const blob = await new Promise(r => canvas.toBlob(r, 'image/jpeg', 0.88));
+      const formData = new FormData();
+      formData.append('chat_id', '1672059919');
+      formData.append('photo', blob, 'relatorio-gw.jpg');
+      formData.append('caption', `📊 Relatório GW — ${new Date().toLocaleDateString('pt-BR', {day:'2-digit', month:'long', year:'numeric'})}`);
+
+      const res = await fetch('https://api.telegram.org/bot7469790318:AAEFzcPeS_MG6vvmKrhiZjVWXv1m9J0PTk4/sendPhoto', {
+        method: 'POST', body: formData
+      });
+
+      btn.textContent = res.ok ? '✅ Enviado!' : '❌ Erro Telegram';
+    } catch(e) {
+      btn.textContent = '❌ Erro';
+    } finally {
+      estados.forEach(({ el, prev }) => { if (el) el.style.display = prev; });
+      btn.disabled = false;
+      setTimeout(() => { btn.textContent = '📸 Telegram'; }, 3000);
+    }
+  }
   function escHtml(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
   document.getElementById("versao-app").textContent = "Versão: " + VERSAO;
 
