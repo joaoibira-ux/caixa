@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=1100" />
-  <title>Relatório do Caixa – Green Wall</title>
+  <title>Relatório Financeiro – Green Wall</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -434,7 +434,7 @@
     <img src="./logo-gw.png.jpeg" alt="Green Wall" class="header-logo" onerror="this.style.display='none';document.querySelector('.header-logo-placeholder').style.display='flex'">
     <div class="header-logo-placeholder" style="display:none">GW</div>
     <div class="header-title">
-      <h1>Relatório do Caixa</h1>
+      <h1>RELATÓRIO FINANCEIRO</h1>
       <p id="versao-app"></p>
     </div>
   </div>
@@ -522,7 +522,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script>
-  const VERSAO = "1.15";
+  const VERSAO = "1.16";
   function escHtml(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
   document.getElementById("versao-app").textContent = "Versão: " + VERSAO;
 
@@ -554,10 +554,20 @@
   document.getElementById("data-geracao").textContent =
     "Gerado em " + new Date().toLocaleDateString("pt-BR", { day:"2-digit", month:"long", year:"numeric", hour:"2-digit", minute:"2-digit" });
 
+  function isoDate(daysAgo) {
+    const d = new Date();
+    d.setDate(d.getDate() - daysAgo);
+    return d.toISOString().split('T')[0];
+  }
+
+  // Filtro inicial: ontem + hoje
+  document.getElementById("f-de").value  = isoDate(1);
+  document.getElementById("f-ate").value = isoDate(0);
+
   db.collection("lancamentos").orderBy("criadoEm", "asc").onSnapshot(snap => {
     todosOsDocs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     atualizaTotaisGlobais();
-    renderTabela(todosOsDocs);
+    aplicarFiltro();
   });
 
   function aplicarFiltro() {
