@@ -367,6 +367,19 @@
       .rotate-overlay { display: flex; }
     }
 
+    /* ── Previsão da Folha ── */
+    .previsao-wrap { margin: 0 32px 32px; }
+    .previsao-card { background: #1a3322; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+    .prev-titulo { background: #0d2318; color: #a5d6a7; padding: 10px 16px; font-size: 0.72rem; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; }
+    .prev-linha { display: flex; justify-content: space-between; align-items: center; padding: 8px 16px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .prev-enc { background: rgba(165,214,167,0.07); }
+    .prev-nome { font-size: 0.88rem; font-weight: 600; color: #c8e6c9; }
+    .prev-cargo { font-size: 0.68rem; font-weight: 400; color: #4a8a5a; text-transform: capitalize; margin-left: 8px; }
+    .prev-valor { font-size: 0.9rem; font-weight: 700; color: #a5d6a7; white-space: nowrap; }
+    .prev-total { display: flex; justify-content: space-between; padding: 10px 16px; background: #0d2318; color: #a5d6a7; font-weight: 800; font-size: 0.95rem; }
+    @media (max-width: 768px) { .previsao-wrap { margin: 0 8px 24px; } }
+    @media print { .previsao-card { print-color-adjust: exact; -webkit-print-color-adjust: exact; } }
+
     @media (max-width: 768px) {
       /* Header */
       .header {
@@ -504,10 +517,13 @@
   </table>
 </div>
 
+<div class="previsao-wrap" id="previsao-folha"></div>
+
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script>
-  const VERSAO = "1.14";
+  const VERSAO = "1.15";
+  function escHtml(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
   document.getElementById("versao-app").textContent = "Versão: " + VERSAO;
 
   firebase.initializeApp({
@@ -705,6 +721,28 @@
     el.textContent = fmt(saldo);
     el.className   = "saldo-total " + (saldo >= 0 ? "pos" : "neg");
   }
+
+  // ── Previsão da Folha ──
+  db.collection('folhas').orderBy('criadoEm', 'desc').limit(1).onSnapshot(snap => {
+    const el = document.getElementById('previsao-folha');
+    if (!el) return;
+    if (snap.empty) { el.innerHTML = ''; return; }
+    const folha = snap.docs[0].data();
+    if (folha.status === 'paga') { el.innerHTML = ''; return; }
+    const grupos = folha.grupos || [];
+    if (!grupos.length) { el.innerHTML = ''; return; }
+    const linhas = grupos.map(g => `
+      <div class="prev-linha${g.isEncarregado ? ' prev-enc' : ''}">
+        <div class="prev-nome">${escHtml(g.funcionario.nome)} <span class="prev-cargo">${escHtml(g.funcionario.cargo||'')}</span></div>
+        <div class="prev-valor">${fmt(g.subtotal)}</div>
+      </div>`).join('');
+    el.innerHTML = `
+      <div class="previsao-card">
+        <div class="prev-titulo">Previsão da Folha de Pagamento</div>
+        ${linhas}
+        <div class="prev-total"><span>Total</span><span>${fmt(folha.totalGeral||0)}</span></div>
+      </div>`;
+  });
 </script>
 <div class="rotate-overlay" id="rotate-overlay">
   <div class="rotate-icon">⟳</div>
