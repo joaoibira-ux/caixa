@@ -465,7 +465,7 @@
           <option value="ANE->GW-INTER">Transferências</option>
           <option value="ANE->HORACIO">ANE → HORACIO</option>
           <option value="JOAO->HORACIO">JOÃO → HORÁCIO</option>
-          <option value="JOAO->RETENCAO PARADIGMA 5%">JOÃO → RETENÇÃO PARADIGMA 5%</option>
+          <option value="ANE->RETENCAO PARADIGMA 5%">ANE → RETENÇÃO PARADIGMA 5%</option>
         </select>
       </div>
       <button class="btn-filtrar" onclick="aplicarFiltro()">Filtrar</button>
@@ -522,7 +522,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script>
-  const VERSAO = "1.16";
+  const VERSAO = "1.17";
   function escHtml(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
   document.getElementById("versao-app").textContent = "Versão: " + VERSAO;
 
@@ -699,8 +699,8 @@
       } else if (r.origem === "JOAO->HORACIO") {
         interS        += r.saida || 0;
         horacioSaidas += r.saida || 0;
-      } else if (r.origem === "JOAO->RETENCAO PARADIGMA 5%") {
-        interS    += r.saida || 0;
+      } else if (r.origem === "ANE->RETENCAO PARADIGMA 5%") {
+        cefS      += r.saida || 0;
         retencaoE += r.saida || 0;
       } else if (r.origem === "ANE->HORACIO") {
         cefS          += r.saida || 0;
