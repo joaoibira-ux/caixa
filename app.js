@@ -7,7 +7,7 @@ const firebaseConfig = {
   appId: "1:472820177992:web:2e1b98c9f6ac3a823d0c7d"
 };
 
-const VERSAO_CAIXA = "3.6";
+const VERSAO_CAIXA = "3.7";
 const HORACIO_BASE = -136306.23;
 const JOAO_BASE = -32250;
 document.getElementById("versao-caixa").textContent = "Versão: " + VERSAO_CAIXA;
@@ -355,11 +355,12 @@ function abrirPickerFuncionario() {
   lista.innerHTML = '<p style="color:#888;padding:12px;text-align:center">Carregando...</p>';
   overlay.classList.add("active");
   db.collection("funcionarios").orderBy("nome").get().then(snap => {
-    if (snap.empty) {
-      lista.innerHTML = '<p style="color:#888;padding:12px;text-align:center">Nenhum funcionário encontrado.</p>';
+    const ativos = snap.docs.filter(d => d.data().ativo !== false);
+    if (!ativos.length) {
+      lista.innerHTML = '<p style="color:#888;padding:12px;text-align:center">Nenhum funcionário ativo encontrado.</p>';
       return;
     }
-    lista.innerHTML = snap.docs.map(d => {
+    lista.innerHTML = ativos.map(d => {
       const f = d.data();
       return `<div class="picker-item" data-nome="${escHtml(f.nome)}" onclick="selecionarFuncionario(this.dataset.nome)">
         ${escHtml(f.nome)}<span class="picker-cargo-badge">${escHtml(f.cargo || "")}</span>
