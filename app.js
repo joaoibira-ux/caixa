@@ -7,7 +7,7 @@ const firebaseConfig = {
   appId: "1:472820177992:web:2e1b98c9f6ac3a823d0c7d"
 };
 
-const VERSAO_CAIXA = "3.8";
+const VERSAO_CAIXA = "3.9";
 const HORACIO_BASE = -136306.23;
 const JOAO_BASE = -32250;
 document.getElementById("versao-caixa").textContent = "Versão: " + VERSAO_CAIXA;
@@ -211,50 +211,29 @@ async function fazerBackupDiario(docs) {
   const dataBR       = `${dd}/${mm}/${yyyy}`;
   const dataSemBarra = `${dd}${mm}${yyyy}`;
 
-  const lancamentos = docs
-    .map(d => d.data())
+  const lancamentos = docs.map(d => d.data())
     .filter(r => r.data === dataBR || r.data === dataSemBarra);
 
   if (lancamentos.length === 0) return;
 
-  const todosData = docs.map(d => d.data());
-  const saldoInicial = todosData
-    .filter(r => r.data !== dataBR && r.data !== dataSemBarra)
-    .reduce((s, r) => {
-      if (r.origem === "ANE->GW-INTER") return s;
-      return s + (r.entrada || 0) - (r.saida || 0);
-    }, 0);
-
-  const lancSemTransf = lancamentos.filter(r => r.origem !== "ANE->GW-INTER");
-  const totalE = lancSemTransf.reduce((s, r) => s + (r.entrada || 0), 0);
-  const totalS = lancSemTransf.reduce((s, r) => s + (r.saida   || 0), 0);
-  const saldoFinal = saldoInicial + totalE - totalS;
-
-  const linhas = lancamentos.map(r => {
-    if (r.origem === "ANE->GW-INTER") {
-      return `• [${r.origem}] ${r.descricao}: ⇄ R$ ${(r.saida||0).toFixed(2).replace(".", ",")}`;
-    }
-    const val = r.entrada > 0
-      ? `+R$ ${r.entrada.toFixed(2).replace(".", ",")}`
-      : `-R$ ${(r.saida||0).toFixed(2).replace(".", ",")}`;
-    return `• [${r.origem}] ${r.descricao}: ${val}`;
-  }).join("\n");
-
-  const fmt = v => `R$ ${v.toFixed(2).replace(".", ",").replace(/\B(?=(\d{3})+(?!\d))/g, ".")}`;
-
-  const msg =
-    `📋 *Caixa GW — ${dataBR}*\n\n` +
-    `🏦 Saldo inicial: ${fmt(saldoInicial)}\n\n` +
-    `${linhas}\n\n` +
-    `✅ Entradas: ${fmt(totalE)}\n` +
-    `❌ Saídas:   ${fmt(totalS)}\n` +
-    `💰 Saldo final: ${fmt(saldoFinal)}`;
-
-  fetch(`https://api.telegram.org/bot7469790318:AAEFzcPeS_MG6vvmKrhiZjVWXv1m9J0PTk4/sendMessage`, {
-    method:  "POST",
-    headers: { "Content-Type": "application/json" },
-    body:    JSON.stringify({ chat_id: "1672059919", text: msg, parse_mode: "Markdown" })
-  }).catch(() => {});
+  // Captura screenshot da tela do caixa e envia como foto
+  try {
+    if (typeof html2canvas === 'undefined') return;
+    const canvas = await html2canvas(document.body, {
+      scale: 1.6, useCORS: true, backgroundColor: '#f0f2f5',
+      scrollX: 0, scrollY: -window.scrollY,
+      windowWidth: document.body.scrollWidth,
+      windowHeight: document.body.scrollHeight
+    });
+    const blob = await new Promise(r => canvas.toBlob(r, 'image/jpeg', 0.88));
+    const formData = new FormData();
+    formData.append('chat_id', '1672059919');
+    formData.append('photo', blob, 'caixa-gw.jpg');
+    formData.append('caption', `📋 Caixa GW — ${dataBR}`);
+    fetch('https://api.telegram.org/bot7469790318:AAEFzcPeS_MG6vvmKrhiZjVWXv1m9J0PTk4/sendPhoto', {
+      method: 'POST', body: formData
+    }).catch(() => {});
+  } catch(e) {}
 }
 
 // Escuta em tempo real — atualiza os dois iPhones automaticamente
