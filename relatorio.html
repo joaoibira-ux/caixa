@@ -599,7 +599,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script>
-  const VERSAO = "1.21";
+  const VERSAO = "1.22";
 
   async function enviarTelegram(btn) {
     btn.disabled = true;
@@ -885,14 +885,21 @@
     if (e.target === document.getElementById('pesquisa-overlay')) fecharPesquisa();
   }
 
+  function normPesq(s) {
+    return String(s || '').toLowerCase()
+      .replace(/\s+/g, '')                        // remove espaços
+      .replace(/\d+/g, n => String(parseInt(n))); // normaliza números (005 → 5)
+  }
+
   function executarPesquisa() {
-    const termo = (document.getElementById('pesquisa-input').value || '').toLowerCase().trim();
-    const el    = document.getElementById('pesquisa-resultado');
+    const termoRaw = (document.getElementById('pesquisa-input').value || '').trim();
+    const el       = document.getElementById('pesquisa-resultado');
 
-    if (!termo) { el.innerHTML = '<p class="pesq-vazio">Digite algo para pesquisar.</p>'; return; }
+    if (!termoRaw) { el.innerHTML = '<p class="pesq-vazio">Digite algo para pesquisar.</p>'; return; }
 
+    const termo = normPesq(termoRaw);
     const encontrados = todosOsDocs.filter(r => {
-      const haystack = `${r.data||''} ${r.descricao||''} ${r.origem||''}`.toLowerCase();
+      const haystack = normPesq(`${r.data||''} ${r.descricao||''} ${r.origem||''}`);
       return haystack.includes(termo);
     });
 
