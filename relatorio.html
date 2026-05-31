@@ -85,8 +85,61 @@
     .btn-telegram { background: #1976d2; }
     .btn-telegram:hover { background: #1251a0; }
     .btn-telegram:disabled { background: #555; cursor: default; }
+    .btn-pesquisa { background: #4a2c7a; }
+    .btn-pesquisa:hover { background: #6a3d9a; }
     .header-btns  { display: flex; gap: 8px; }
-    @media print  { .btn-telegram { display: none !important; } }
+    @media print  { .btn-telegram, .btn-pesquisa { display: none !important; } }
+
+    /* ── MODAL PESQUISA ── */
+    .pesquisa-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+      display: none; align-items: flex-start; justify-content: center;
+      z-index: 300; padding: 24px 16px; overflow-y: auto;
+    }
+    .pesquisa-overlay.ativa { display: flex; }
+    .pesquisa-modal {
+      background: #1a3322; border-radius: 14px; width: 100%; max-width: 700px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4); overflow: hidden;
+    }
+    .pesquisa-header {
+      background: #0d2318; padding: 16px 20px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .pesquisa-input {
+      flex: 1; background: rgba(255,255,255,0.1); border: 1px solid rgba(165,214,167,0.3);
+      border-radius: 8px; padding: 10px 14px; color: #e8f5e9; font-size: 1rem;
+      outline: none;
+    }
+    .pesquisa-input::placeholder { color: #4a8a5a; }
+    .pesquisa-input:focus { border-color: #4caf50; background: rgba(255,255,255,0.15); }
+    .btn-fechar-pesquisa {
+      background: none; border: none; color: #a5d6a7; font-size: 1.4rem;
+      cursor: pointer; padding: 4px 8px; line-height: 1;
+    }
+    .pesquisa-resultado { padding: 16px 20px; }
+    .pesq-secao-titulo {
+      font-size: 0.68rem; font-weight: 800; letter-spacing: 1.5px;
+      text-transform: uppercase; color: #4a8a5a; padding: 8px 0 6px;
+      border-bottom: 1px solid rgba(165,214,167,0.15); margin-bottom: 6px;
+    }
+    .pesq-linha {
+      display: flex; justify-content: space-between; align-items: baseline;
+      padding: 5px 0; border-bottom: 1px solid rgba(165,214,167,0.06);
+      font-size: 0.82rem; gap: 8px;
+    }
+    .pesq-linha-info { color: #c8e6c9; flex: 1; min-width: 0; }
+    .pesq-linha-data { color: #4a8a5a; font-size: 0.72rem; white-space: nowrap; }
+    .pesq-linha-val  { font-weight: 700; white-space: nowrap; }
+    .pesq-val-entrada { color: #81c784; }
+    .pesq-val-saida   { color: #ef9a9a; }
+    .pesq-resumo {
+      margin-top: 14px; background: #0d2318; border-radius: 8px; padding: 12px 16px;
+      display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+    }
+    .pesq-res-item { text-align: center; }
+    .pesq-res-label { font-size: 0.65rem; color: #4a8a5a; text-transform: uppercase; letter-spacing: 1px; }
+    .pesq-res-val   { font-size: 1rem; font-weight: 800; margin-top: 2px; }
+    .pesq-vazio { color: #4a8a5a; text-align: center; padding: 24px; font-size: 0.9rem; }
 
     /* ── FILTROS (dentro da barra escura da tabela) ── */
     .filtros {
@@ -446,6 +499,7 @@
   <div class="header-right">
     <div class="data-geracao" id="data-geracao"></div>
     <div class="header-btns">
+      <button class="btn-pesquisa" onclick="abrirPesquisa()">🔍 Pesquisar</button>
       <button class="btn-telegram" onclick="enviarTelegram(this)">📸 Telegram</button>
       <button class="btn-print" onclick="window.print()">🖨 Imprimir</button>
     </div>
@@ -529,11 +583,23 @@
 <div class="previsao-wrap" id="previsao-folha"></div>
 <div class="previsao-wrap" id="previsao-medicao"></div>
 
+<div class="pesquisa-overlay" id="pesquisa-overlay" onclick="fecharPesquisaSe(event)">
+  <div class="pesquisa-modal">
+    <div class="pesquisa-header">
+      <input class="pesquisa-input" id="pesquisa-input" type="text"
+             placeholder="Ex: BM 04, Paradigma, ANE…"
+             oninput="executarPesquisa()" />
+      <button class="btn-fechar-pesquisa" onclick="fecharPesquisa()">✕</button>
+    </div>
+    <div class="pesquisa-resultado" id="pesquisa-resultado"></div>
+  </div>
+</div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script>
-  const VERSAO = "1.20";
+  const VERSAO = "1.21";
 
   async function enviarTelegram(btn) {
     btn.disabled = true;
@@ -804,6 +870,77 @@
     const el = document.getElementById("f-total-saldo");
     el.textContent = fmt(saldo);
     el.className   = "saldo-total " + (saldo >= 0 ? "pos" : "neg");
+  }
+
+  // ── Pesquisa ──
+  function abrirPesquisa() {
+    document.getElementById('pesquisa-overlay').classList.add('ativa');
+    document.getElementById('pesquisa-input').focus();
+    executarPesquisa();
+  }
+  function fecharPesquisa() {
+    document.getElementById('pesquisa-overlay').classList.remove('ativa');
+  }
+  function fecharPesquisaSe(e) {
+    if (e.target === document.getElementById('pesquisa-overlay')) fecharPesquisa();
+  }
+
+  function executarPesquisa() {
+    const termo = (document.getElementById('pesquisa-input').value || '').toLowerCase().trim();
+    const el    = document.getElementById('pesquisa-resultado');
+
+    if (!termo) { el.innerHTML = '<p class="pesq-vazio">Digite algo para pesquisar.</p>'; return; }
+
+    const encontrados = todosOsDocs.filter(r => {
+      const haystack = `${r.data||''} ${r.descricao||''} ${r.origem||''}`.toLowerCase();
+      return haystack.includes(termo);
+    });
+
+    if (!encontrados.length) {
+      el.innerHTML = '<p class="pesq-vazio">Nenhum resultado encontrado.</p>';
+      return;
+    }
+
+    const entradas = encontrados.filter(r => (r.entrada || 0) > 0 && r.origem !== 'ANE->GW-INTER');
+    const saidas   = encontrados.filter(r => (r.saida   || 0) > 0);
+
+    const totalE = entradas.reduce((s, r) => s + (r.entrada || 0), 0);
+    const totalS = saidas.reduce((s, r) => s + (r.saida || 0), 0);
+    const saldo  = totalE - totalS;
+
+    const linhaHtml = r => `
+      <div class="pesq-linha">
+        <span class="pesq-linha-data">${escHtml(r.data||'')}</span>
+        <span class="pesq-linha-info">${escHtml(r.descricao||'')} <small style="color:#4a8a5a">${escHtml(r.origem||'')}</small></span>
+        ${(r.entrada||0) > 0 && r.origem !== 'ANE->GW-INTER'
+          ? `<span class="pesq-linha-val pesq-val-entrada">+${fmt(r.entrada)}</span>`
+          : `<span class="pesq-linha-val pesq-val-saida">-${fmt(r.saida||0)}</span>`}
+      </div>`;
+
+    const secEntradas = entradas.length ? `
+      <div class="pesq-secao-titulo">Entradas (${entradas.length})</div>
+      ${entradas.map(linhaHtml).join('')}` : '';
+
+    const secSaidas = saidas.length ? `
+      <div class="pesq-secao-titulo" style="margin-top:12px">Saídas (${saidas.length})</div>
+      ${saidas.map(linhaHtml).join('')}` : '';
+
+    el.innerHTML = `
+      ${secEntradas}${secSaidas}
+      <div class="pesq-resumo">
+        <div class="pesq-res-item">
+          <div class="pesq-res-label">Entradas</div>
+          <div class="pesq-res-val" style="color:#81c784">${fmt(totalE)}</div>
+        </div>
+        <div class="pesq-res-item">
+          <div class="pesq-res-label">Saídas</div>
+          <div class="pesq-res-val" style="color:#ef9a9a">${fmt(totalS)}</div>
+        </div>
+        <div class="pesq-res-item">
+          <div class="pesq-res-label">Saldo</div>
+          <div class="pesq-res-val" style="color:${saldo>=0?'#a5d6a7':'#ef9a9a'}">${fmt(saldo)}</div>
+        </div>
+      </div>`;
   }
 
   // ── Previsão da Medição ──
