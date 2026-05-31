@@ -474,6 +474,7 @@
           <option value="ANE->HORACIO">ANE → HORACIO</option>
           <option value="JOAO->HORACIO">JOÃO → HORÁCIO</option>
           <option value="ANE->RETENCAO PARADIGMA 5%">ANE → RETENÇÃO PARADIGMA 5%</option>
+          <option value="JOAO->RETENCAO PARADIGMA 5%">JOAO → RETENÇÃO PARADIGMA 5%</option>
         </select>
       </div>
       <button class="btn-filtrar" onclick="aplicarFiltro()">Filtrar</button>
@@ -532,7 +533,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script>
-  const VERSAO = "1.19";
+  const VERSAO = "1.20";
 
   async function enviarTelegram(btn) {
     btn.disabled = true;
@@ -771,6 +772,9 @@
         horacioSaidas += r.saida || 0;
       } else if (r.origem === "ANE->RETENCAO PARADIGMA 5%") {
         cefS      += r.saida || 0;
+        retencaoE += r.saida || 0;
+      } else if (r.origem === "JOAO->RETENCAO PARADIGMA 5%") {
+        interS    += r.saida || 0;
         retencaoE += r.saida || 0;
       } else if (r.origem === "ANE->HORACIO") {
         cefS          += r.saida || 0;
