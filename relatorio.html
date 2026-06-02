@@ -637,7 +637,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script>
-  const VERSAO = "1.25";
+  const VERSAO = "1.26";
 
   async function enviarTelegram(btn) {
     btn.disabled = true;
@@ -1041,7 +1041,7 @@
       total += subtotal;
       return `
         <div class="prev-linha">
-          <div class="prev-nome">${escHtml(nome)} <span class="prev-cargo">${count} apto${count !== 1 ? 's' : ''} × ${fmt(medicao)}</span></div>
+          <div class="prev-nome" style="grid-column:1/4">${escHtml(nome)} <span class="prev-cargo">${count} apto${count !== 1 ? 's' : ''} × ${fmt(medicao)}</span></div>
           <div class="prev-valor">${fmt(subtotal)}</div>
         </div>`;
     }).join('');
@@ -1050,7 +1050,7 @@
       <div class="previsao-card">
         <div class="prev-titulo">Previsão da Medição</div>
         ${linhas}
-        <div class="prev-total"><span>Total</span><span>${fmt(total)}</span></div>
+        <div class="prev-total"><span style="grid-column:1/4">Total</span><span>${fmt(total)}</span></div>
       </div>`;
   }
 
