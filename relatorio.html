@@ -429,12 +429,19 @@
     .previsao-wrap { margin: 0 32px 32px; }
     .previsao-card { background: #1a3322; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
     .prev-titulo { background: #0d2318; color: #a5d6a7; padding: 10px 16px; font-size: 0.72rem; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; }
-    .prev-linha { display: flex; justify-content: space-between; align-items: center; padding: 8px 16px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .prev-header { display: grid; grid-template-columns: 1fr 90px 90px 90px; padding: 5px 16px; border-bottom: 1px solid rgba(165,214,167,0.15); }
+    .prev-header span { font-size: 0.6rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #4a8a5a; text-align: right; }
+    .prev-header span:first-child { text-align: left; }
+    .prev-linha { display: grid; grid-template-columns: 1fr 90px 90px 90px; align-items: center; padding: 8px 16px; border-bottom: 1px solid rgba(255,255,255,0.05); }
     .prev-enc { background: rgba(165,214,167,0.07); }
     .prev-nome { font-size: 0.88rem; font-weight: 600; color: #c8e6c9; }
     .prev-cargo { font-size: 0.68rem; font-weight: 400; color: #4a8a5a; text-transform: capitalize; margin-left: 8px; }
-    .prev-valor { font-size: 0.9rem; font-weight: 700; color: #a5d6a7; white-space: nowrap; }
-    .prev-total { display: flex; justify-content: space-between; padding: 10px 16px; background: #0d2318; color: #a5d6a7; font-weight: 800; font-size: 0.95rem; }
+    .prev-valor { font-size: 0.85rem; font-weight: 700; color: #a5d6a7; white-space: nowrap; text-align: right; }
+    .prev-adiant { font-size: 0.85rem; font-weight: 700; color: #ef9a9a; white-space: nowrap; text-align: right; }
+    .prev-liq    { font-size: 0.85rem; font-weight: 700; color: #fff; white-space: nowrap; text-align: right; }
+    .prev-total { display: grid; grid-template-columns: 1fr 90px 90px 90px; padding: 10px 16px; background: #0d2318; color: #a5d6a7; font-weight: 800; font-size: 0.9rem; }
+    .prev-total span { text-align: right; }
+    .prev-total span:first-child { text-align: left; }
     @media (max-width: 768px) { .previsao-wrap { margin: 0 8px 24px; } }
     @media print { .previsao-card { print-color-adjust: exact; -webkit-print-color-adjust: exact; } }
 
@@ -599,7 +606,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script>
-  const VERSAO = "1.23";
+  const VERSAO = "1.24";
 
   async function enviarTelegram(btn) {
     btn.disabled = true;
@@ -1002,7 +1009,11 @@
   db.collection('servicos').onSnapshot(snap => { _servicosSnap = snap; renderPrevisaoMedicao(); });
 
   // ── Previsão da Folha ──
-  db.collection('folhas').orderBy('criadoEm', 'desc').limit(1).onSnapshot(snap => {
+  function normNome(s) {
+    return String(s||'').toLowerCase().replace(/\s+/g,'').replace(/\d+/g,n=>String(parseInt(n))).normalize('NFC');
+  }
+
+  db.collection('folhas').orderBy('criadoEm', 'desc').limit(1).onSnapshot(async snap => {
     const el = document.getElementById('previsao-folha');
     if (!el) return;
     if (snap.empty) { el.innerHTML = ''; return; }
@@ -1010,16 +1021,51 @@
     if (folha.status === 'paga') { el.innerHTML = ''; return; }
     const grupos = folha.grupos || [];
     if (!grupos.length) { el.innerHTML = ''; return; }
-    const linhas = grupos.map(g => `
-      <div class="prev-linha${g.isEncarregado ? ' prev-enc' : ''}">
-        <div class="prev-nome">${escHtml(g.funcionario.nome)} <span class="prev-cargo">${escHtml(g.funcionario.cargo||'')}</span></div>
-        <div class="prev-valor">${fmt(g.subtotal)}</div>
-      </div>`).join('');
+
+    // Busca adiantamentos para cruzar com os funcionários
+    const adiantMap = new Map();
+    try {
+      const adSnap = await db.collection('lancamentos').where('origem','==','ANE->ADIANTAMENTO').get();
+      adSnap.docs.forEach(d => {
+        const r = d.data();
+        const desc = r.descricao || '';
+        if (!desc.startsWith('Adiantamento: ')) return;
+        const nome = desc.slice('Adiantamento: '.length).split(/\s*[—–\-]/)[0].trim().normalize('NFC');
+        if (!nome) return;
+        adiantMap.set(normNome(nome), (adiantMap.get(normNome(nome)) || 0) + (r.saida || 0));
+      });
+    } catch(e) {}
+
+    let totalBruto = 0, totalAdiant = 0;
+    const linhas = grupos.map(g => {
+      const bruto  = g.subtotal || 0;
+      const adiant = adiantMap.get(normNome(g.funcionario.nome)) || 0;
+      const liq    = bruto - adiant;
+      totalBruto  += bruto;
+      totalAdiant += adiant;
+      return `
+        <div class="prev-linha${g.isEncarregado ? ' prev-enc' : ''}">
+          <div class="prev-nome">${escHtml(g.funcionario.nome)} <span class="prev-cargo">${escHtml(g.funcionario.cargo||'')}</span></div>
+          <div class="prev-valor">${fmt(bruto)}</div>
+          <div class="prev-adiant">${adiant > 0 ? '- '+fmt(adiant) : '—'}</div>
+          <div class="prev-liq">${fmt(liq)}</div>
+        </div>`;
+    }).join('');
+
+    const totalLiq = totalBruto - totalAdiant;
     el.innerHTML = `
       <div class="previsao-card">
         <div class="prev-titulo">Previsão da Folha de Pagamento</div>
+        <div class="prev-header">
+          <span>Funcionário</span><span>Bruto</span><span>Adiant.</span><span>Líquido</span>
+        </div>
         ${linhas}
-        <div class="prev-total"><span>Total</span><span>${fmt(folha.totalGeral||0)}</span></div>
+        <div class="prev-total">
+          <span>Total</span>
+          <span>${fmt(totalBruto)}</span>
+          <span style="color:#ef9a9a">${totalAdiant > 0 ? '- '+fmt(totalAdiant) : '—'}</span>
+          <span>${fmt(totalLiq)}</span>
+        </div>
       </div>`;
   });
 </script>
