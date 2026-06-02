@@ -7,7 +7,7 @@ const firebaseConfig = {
   appId: "1:472820177992:web:2e1b98c9f6ac3a823d0c7d"
 };
 
-const VERSAO_CAIXA = "3.11";
+const VERSAO_CAIXA = "3.12";
 const HORACIO_BASE = -136306.23;
 const JOAO_BASE = -32250;
 document.getElementById("versao-caixa").textContent = "Versão: " + VERSAO_CAIXA;
@@ -70,7 +70,7 @@ function render(docs) {
       cefS   += r.saida || 0;
       interE += r.saida || 0;
     } else if (r.origem === "JOAO->CREDITO DE PROLABORE") {
-      joaoE += r.entrada || 0;
+      joaoE -= r.saida || 0;
     } else {
       totalE += r.entrada || 0;
       totalS += r.saida || 0;
@@ -138,7 +138,7 @@ function render(docs) {
     const isCredito       = r.origem === "JOAO->CREDITO DE PROLABORE";
     const tipo   = (isTransfInter || isTransfHoracio) ? "transferencia" : isCredito ? "credito" : (r.entrada > 0 ? "entrada" : "saida");
     const valor  = (isTransfInter || isTransfHoracio) ? r.saida : (r.entrada > 0 ? r.entrada : r.saida);
-    const prefix = isTransfInter ? "⇄" : (tipo === "saida" ? "−" : "+");
+    const prefix = isTransfInter ? "⇄" : (tipo === "saida" || tipo === "credito" ? "−" : "+");
     const btnDel = doc.id === ultimoDocId
       ? `<button class="btn-del" onclick="deletar('${doc.id}')" title="Excluir">✕</button>`
       : "";
