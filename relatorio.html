@@ -564,6 +564,7 @@
           <option value="JOAO->HORACIO">JOÃO → HORÁCIO</option>
           <option value="ANE->RETENCAO PARADIGMA 5%">ANE → RETENÇÃO PARADIGMA 5%</option>
           <option value="JOAO->RETENCAO PARADIGMA 5%">JOAO → RETENÇÃO PARADIGMA 5%</option>
+          <option value="JOAO->JOAO">JOÃO → JOÃO</option>
         </select>
       </div>
       <button class="btn-filtrar" onclick="aplicarFiltro()">Filtrar</button>
@@ -638,7 +639,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script>
-  const VERSAO = "1.29";
+  const VERSAO = "1.30";
 
   async function enviarTelegram(btn) {
     btn.disabled = true;
@@ -890,6 +891,9 @@
       } else if (r.origem === "ANE->JOAO") {
         cefS  += r.saida || 0;
         joaoE += r.saida || 0;
+      } else if (r.origem === "JOAO->JOAO") {
+        interS += r.saida || 0;
+        joaoE  += r.saida || 0;
       } else if (r.origem === "JOAO->HORACIO") {
         interS        += r.saida || 0;
         horacioSaidas += r.saida || 0;

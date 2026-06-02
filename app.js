@@ -7,7 +7,7 @@ const firebaseConfig = {
   appId: "1:472820177992:web:2e1b98c9f6ac3a823d0c7d"
 };
 
-const VERSAO_CAIXA = "3.12";
+const VERSAO_CAIXA = "3.13";
 const HORACIO_BASE = -136306.23;
 const JOAO_BASE = -32250;
 document.getElementById("versao-caixa").textContent = "Versão: " + VERSAO_CAIXA;
@@ -86,6 +86,9 @@ function render(docs) {
       } else if (r.origem === "ANE->JOAO") {
         cefS  += r.saida || 0;
         joaoE += r.saida || 0;
+      } else if (r.origem === "JOAO->JOAO") {
+        interS += r.saida || 0;
+        joaoE  += r.saida || 0;
       } else if (r.origem === "JOAO->HORACIO") {
         interS        += r.saida || 0;
         horacioSaidas += r.saida || 0;
@@ -295,7 +298,7 @@ document.getElementById("f-data").value = hoje();
 document.getElementById("f-origem").addEventListener("change", function() {
   const desc   = document.getElementById("f-desc");
   const saida  = document.getElementById("f-saida");
-  const autoDescs = ["Transferência Pix: CEF -> INTER", "Transferência Pix: CEF -> HORÁCIO", "Pró-labore JOAO: CEF -> JOAO", "Transferência Pix: INTER -> HORÁCIO", "Folha de Pagamento da Produção", "Crédito Pró-labore: João Albérico"];
+  const autoDescs = ["Transferência Pix: CEF -> INTER", "Transferência Pix: CEF -> HORÁCIO", "Pró-labore JOAO: CEF -> JOAO", "Transferência Pix: INTER -> HORÁCIO", "Folha de Pagamento da Produção", "Crédito Pró-labore: João Albérico", "Pró-labore JOAO: INTER -> JOAO"];
 
   // Sempre reseta o campo saída e prefixo ao trocar origem
   saida.readOnly = false;
@@ -320,6 +323,8 @@ document.getElementById("f-origem").addEventListener("change", function() {
     desc.value = "Retenção 5% Paradigma";
   } else if (this.value === "JOAO->CREDITO DE PROLABORE") {
     desc.value = "Crédito Pró-labore: João Albérico";
+  } else if (this.value === "JOAO->JOAO") {
+    desc.value = "Pró-labore JOAO: INTER -> JOAO";
   } else if (this.value === "ANE->FOLHA DE PAGAMENTO") {
     desc.value = "Folha de Pagamento da Produção";
     saida.value = "carregando...";
