@@ -7,7 +7,7 @@ const firebaseConfig = {
   appId: "1:472820177992:web:2e1b98c9f6ac3a823d0c7d"
 };
 
-const VERSAO_CAIXA = "3.10";
+const VERSAO_CAIXA = "3.11";
 const HORACIO_BASE = -136306.23;
 const JOAO_BASE = -32250;
 document.getElementById("versao-caixa").textContent = "Versão: " + VERSAO_CAIXA;
@@ -69,6 +69,8 @@ function render(docs) {
     if (r.origem === "ANE->GW-INTER") {
       cefS   += r.saida || 0;
       interE += r.saida || 0;
+    } else if (r.origem === "JOAO->CREDITO DE PROLABORE") {
+      joaoE += r.entrada || 0;
     } else {
       totalE += r.entrada || 0;
       totalS += r.saida || 0;
@@ -133,9 +135,10 @@ function render(docs) {
     const r = doc.data();
     const isTransfInter   = r.origem === "ANE->GW-INTER";
     const isTransfHoracio = r.origem === "ANE->HORACIO" || r.origem === "JOAO->HORACIO";
-    const tipo   = (isTransfInter || isTransfHoracio) ? "transferencia" : (r.entrada > 0 ? "entrada" : "saida");
+    const isCredito       = r.origem === "JOAO->CREDITO DE PROLABORE";
+    const tipo   = (isTransfInter || isTransfHoracio) ? "transferencia" : isCredito ? "credito" : (r.entrada > 0 ? "entrada" : "saida");
     const valor  = (isTransfInter || isTransfHoracio) ? r.saida : (r.entrada > 0 ? r.entrada : r.saida);
-    const prefix = isTransfInter ? "⇄" : (tipo === "entrada" ? "+" : "−");
+    const prefix = isTransfInter ? "⇄" : (tipo === "saida" ? "−" : "+");
     const btnDel = doc.id === ultimoDocId
       ? `<button class="btn-del" onclick="deletar('${doc.id}')" title="Excluir">✕</button>`
       : "";
@@ -148,7 +151,7 @@ function render(docs) {
         </div>
         <div class="card-meta">
           <span>${escHtml(r.data)}</span>
-          <span class="badge">${escHtml(r.origem)}</span>
+          <span class="badge${isCredito ? ' credito-prolabore' : ''}">${escHtml(r.origem)}</span>
         </div>
       </div>`;
   }).join("");
@@ -292,7 +295,7 @@ document.getElementById("f-data").value = hoje();
 document.getElementById("f-origem").addEventListener("change", function() {
   const desc   = document.getElementById("f-desc");
   const saida  = document.getElementById("f-saida");
-  const autoDescs = ["Transferência Pix: CEF -> INTER", "Transferência Pix: CEF -> HORÁCIO", "Pró-labore JOAO: CEF -> JOAO", "Transferência Pix: INTER -> HORÁCIO", "Folha de Pagamento da Produção"];
+  const autoDescs = ["Transferência Pix: CEF -> INTER", "Transferência Pix: CEF -> HORÁCIO", "Pró-labore JOAO: CEF -> JOAO", "Transferência Pix: INTER -> HORÁCIO", "Folha de Pagamento da Produção", "Crédito Pró-labore: João Albérico"];
 
   // Sempre reseta o campo saída e prefixo ao trocar origem
   saida.readOnly = false;
@@ -315,6 +318,8 @@ document.getElementById("f-origem").addEventListener("change", function() {
     desc.value = "Retenção 5% Paradigma";
   } else if (this.value === "JOAO->RETENCAO PARADIGMA 5%") {
     desc.value = "Retenção 5% Paradigma";
+  } else if (this.value === "JOAO->CREDITO DE PROLABORE") {
+    desc.value = "Crédito Pró-labore: João Albérico";
   } else if (this.value === "ANE->FOLHA DE PAGAMENTO") {
     desc.value = "Folha de Pagamento da Produção";
     saida.value = "carregando...";

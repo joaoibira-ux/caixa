@@ -158,6 +158,8 @@ input:focus, select:focus {
 .card-valor.entrada       { color: #2e7d32; }
 .card-valor.saida         { color: #c62828; }
 .card-valor.transferencia { color: #7b1fa2; }
+.card-valor.credito       { color: #e65100; }
+.badge.credito-prolabore  { background: #fff3e0; color: #e65100; }
 
 .card-meta {
   display: flex;
