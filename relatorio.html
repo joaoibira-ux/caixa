@@ -383,6 +383,33 @@
       font-size: 0.9rem;
     }
 
+    /* ── LOADING ── */
+    .loading-row td {
+      text-align: center;
+      padding: 32px;
+      color: #4a8a5a;
+      font-size: 0.88rem;
+    }
+    .loading-dots::after {
+      content: '';
+      animation: dots 1.5s steps(4, end) infinite;
+    }
+    @keyframes dots {
+      0%   { content: ''; }
+      25%  { content: '.'; }
+      50%  { content: '..'; }
+      75%  { content: '...'; }
+      100% { content: ''; }
+    }
+    .loading-lenta { color: #e65100 !important; }
+    .loading-spinner {
+      display: inline-block; width: 14px; height: 14px;
+      border: 2px solid #4a8a5a; border-top-color: transparent;
+      border-radius: 50%; animation: spin 0.8s linear infinite;
+      margin-right: 8px; vertical-align: middle;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
     /* ── PRINT ── */
     @media print {
       body { background: white; }
@@ -571,7 +598,11 @@
         <th class="col-saldo" style="text-align:right">Saldo Acum.</th>
       </tr>
     </thead>
-    <tbody id="tbody"></tbody>
+    <tbody id="tbody">
+      <tr class="loading-row">
+        <td colspan="6"><span class="loading-spinner"></span><span class="loading-dots">Carregando</span></td>
+      </tr>
+    </tbody>
     <tbody id="tbody-totais">
       <tr class="row-totais">
         <td colspan="3" class="lbl">TOTAIS</td>
@@ -606,7 +637,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script>
-  const VERSAO = "1.24";
+  const VERSAO = "1.25";
 
   async function enviarTelegram(btn) {
     btn.disabled = true;
@@ -694,6 +725,21 @@
   }
 
   let todosOsDocs = [];
+  let _loadingTimer = null;
+
+  function iniciarTimerRedeLenta() {
+    _loadingTimer = setTimeout(() => {
+      const tbody = document.getElementById('tbody');
+      if (tbody && tbody.querySelector('.loading-row')) {
+        tbody.innerHTML = `<tr class="loading-row"><td colspan="6"><span class="loading-spinner" style="border-color:#e65100;border-top-color:transparent"></span><span class="loading-lenta">Rede lenta — aguarde<span class="loading-dots"></span></span></td></tr>`;
+      }
+    }, 5000);
+  }
+
+  function pararTimerRedeLenta() {
+    clearTimeout(_loadingTimer);
+    _loadingTimer = null;
+  }
 
   document.getElementById("data-geracao").textContent =
     "Gerado em " + new Date().toLocaleDateString("pt-BR", { day:"2-digit", month:"long", year:"numeric", hour:"2-digit", minute:"2-digit" });
@@ -708,7 +754,10 @@
   document.getElementById("f-de").value  = isoDate(1);
   document.getElementById("f-ate").value = isoDate(0);
 
+  iniciarTimerRedeLenta();
+
   db.collection("lancamentos").orderBy("criadoEm", "asc").onSnapshot(snap => {
+    pararTimerRedeLenta();
     todosOsDocs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     atualizaTotaisGlobais();
     aplicarFiltro();
