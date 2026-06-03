@@ -640,7 +640,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script>
-  const VERSAO = "1.31";
+  const VERSAO = "1.32";
 
   async function enviarTelegram(btn) {
     btn.disabled = true;
@@ -909,6 +909,10 @@
       } else if (r.origem === "ANE->HORACIO") {
         cefS          += r.saida || 0;
         horacioSaidas += r.saida || 0;
+      } else if (r.origem === "ANE->FOLHA DE PAGAMENTO") {
+        cefS += r.saida || 0;
+      } else if (r.origem === "ANE->ADIANTAMENTO") {
+        cefS += r.saida || 0;
       } else if (r.origem === "ANE") {
         cefE += r.entrada || 0;
         cefS += r.saida   || 0;
