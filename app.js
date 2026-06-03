@@ -7,7 +7,7 @@ const firebaseConfig = {
   appId: "1:472820177992:web:2e1b98c9f6ac3a823d0c7d"
 };
 
-const VERSAO_CAIXA = "3.13";
+const VERSAO_CAIXA = "3.14";
 const HORACIO_BASE = -136306.23;
 const JOAO_BASE = -32250;
 document.getElementById("versao-caixa").textContent = "Versão: " + VERSAO_CAIXA;
@@ -222,24 +222,12 @@ async function fazerBackupDiario(docs) {
 
   if (lancamentos.length === 0) return;
 
-  // Captura screenshot da tela do caixa e envia como foto
-  try {
-    if (typeof html2canvas === 'undefined') return;
-    const canvas = await html2canvas(document.body, {
-      scale: 1.6, useCORS: true, backgroundColor: '#f0f2f5',
-      scrollX: 0, scrollY: -window.scrollY,
-      windowWidth: document.body.scrollWidth,
-      windowHeight: document.body.scrollHeight
-    });
-    const blob = await new Promise(r => canvas.toBlob(r, 'image/jpeg', 0.88));
-    const formData = new FormData();
-    formData.append('chat_id', '1672059919');
-    formData.append('photo', blob, 'caixa-gw.jpg');
-    formData.append('caption', `📋 Caixa GW — ${dataBR}`);
-    fetch('https://api.telegram.org/bot7469790318:AAEFzcPeS_MG6vvmKrhiZjVWXv1m9J0PTk4/sendPhoto', {
-      method: 'POST', body: formData
-    }).catch(() => {});
-  } catch(e) {}
+  // Carrega relatório em iframe oculto — ele detecta ?autobackup=1 e envia o screenshot
+  const iframe = document.createElement('iframe');
+  iframe.src = './relatorio.html?autobackup=1';
+  iframe.style.cssText = 'position:fixed;left:-9999px;top:0;width:390px;height:844px;border:none;visibility:hidden;';
+  document.body.appendChild(iframe);
+  setTimeout(() => { if (iframe.parentNode) iframe.parentNode.removeChild(iframe); }, 90000);
 }
 
 // Escuta em tempo real — atualiza os dois iPhones automaticamente
