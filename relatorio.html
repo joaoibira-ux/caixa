@@ -420,9 +420,9 @@
       thead th       { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
     }
 
-    /* Overlay de rotação */
+    /* Overlay de rotação — desativado */
     .rotate-overlay {
-      display: none;
+      display: none !important;
       position: fixed;
       inset: 0;
       background: #1a3322;
@@ -448,9 +448,7 @@
     .rotate-overlay h2 { font-size: 1.4rem; font-weight: 800; }
     .rotate-overlay p  { font-size: 0.95rem; color: #a5d6a7; }
 
-    @media screen and (max-width: 768px) and (orientation: portrait) {
-      .rotate-overlay { display: flex; }
-    }
+    /* orientação portrait — sem overlay */
 
     /* ── Previsão da Folha ── */
     .previsao-wrap { margin: 0 32px 32px; }
@@ -640,7 +638,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script>
-  const VERSAO = "1.34";
+  const VERSAO = "1.35";
 
   async function enviarTelegram(btn) {
     btn.disabled = true;
