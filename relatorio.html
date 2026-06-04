@@ -307,13 +307,13 @@
     .badge.joao { background: rgba(230,81,0,0.25); color: #ffb74d; }
     .badge.transf { background: rgba(106,27,154,0.3); color: #ce93d8; }
     .col-entrada-val {
-      color: #2e7d32;
+      color: #a5d6a7;
       font-weight: 700;
       text-align: right;
       white-space: nowrap;
     }
     .col-saida-val {
-      color: #c62828;
+      color: #ef9a9a;
       font-weight: 700;
       text-align: right;
       white-space: nowrap;
@@ -323,9 +323,9 @@
       text-align: right;
       white-space: nowrap;
     }
-    .col-saldo-val.pos { color: #1a3322; }
-    .col-saldo-val.neg { color: #c62828; }
-    td.vazio { color: #ccc; text-align: right; }
+    .col-saldo-val.pos { color: #a5d6a7; }
+    .col-saldo-val.neg { color: #ef9a9a; }
+    td.vazio { color: #4a8a5a; text-align: right; }
 
     /* ── RODAPÉ TABELA ── */
     .row-totais td {
@@ -357,8 +357,8 @@
     .row-retencao td.retencao-valor { color: #e0f7fa; text-align: right; }
 
     .row-saldo-anterior td {
-      background: #e8f5e9;
-      border-bottom: 2px solid #4caf50;
+      background: #0d2318;
+      border-bottom: 2px solid #2d5a2d;
       padding: 10px 14px;
     }
     .sa-label {
@@ -374,8 +374,8 @@
       text-align: right;
       white-space: nowrap;
     }
-    .sa-valor.pos { color: #1a3322; }
-    .sa-valor.neg { color: #c62828; }
+    .sa-valor.pos { color: #a5d6a7; }
+    .sa-valor.neg { color: #ef9a9a; }
 
     .empty-row td {
       text-align: center;
@@ -640,7 +640,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script>
-  const VERSAO = "1.38";
+  const VERSAO = "1.39";
 
   async function enviarTelegram(btn) {
     btn.disabled = true;
