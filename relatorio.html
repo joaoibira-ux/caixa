@@ -640,7 +640,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script>
-  const VERSAO = "1.33";
+  const VERSAO = "1.34";
 
   async function enviarTelegram(btn) {
     btn.disabled = true;
@@ -1084,7 +1084,22 @@
     if (snap.empty) { el.innerHTML = ''; return; }
     const folha = snap.docs[0].data();
     if (folha.status === 'paga') { el.innerHTML = ''; return; }
-    const grupos = folha.grupos || [];
+    let grupos = folha.grupos || [];
+
+    // Adiciona diaristas da coleção 'diarias' (nova arquitetura)
+    try {
+      const diarSnap = await db.collection('diarias').get();
+      diarSnap.docs.forEach(d => {
+        const doc = d.data();
+        const subtotal = (doc.dias || []).reduce((s, dia) => s + Number(dia.valor || 0), 0);
+        if (subtotal > 0) grupos = [...grupos, {
+          isEncarregado: false,
+          funcionario: { nome: doc.funcionarioNome, cargo: doc.cargo || 'Ajudante' },
+          subtotal
+        }];
+      });
+    } catch(e) {}
+
     if (!grupos.length) { el.innerHTML = ''; return; }
 
     // Busca adiantamentos para cruzar com os funcionários
