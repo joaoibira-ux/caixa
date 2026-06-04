@@ -640,7 +640,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script>
-  const VERSAO = "1.37";
+  const VERSAO = "1.38";
 
   async function enviarTelegram(btn) {
     btn.disabled = true;
@@ -1084,9 +1084,12 @@
     if (snap.empty) { el.innerHTML = ''; return; }
     const folha = snap.docs[0].data();
     if (folha.status === 'paga') { el.innerHTML = ''; return; }
-    let grupos = folha.grupos || [];
+    // Remove ajudantes do documento salvo — agora vêm da coleção 'diarias'
+    let grupos = (folha.grupos || []).filter(g =>
+      g.isEncarregado || !(g.funcionario?.cargo || '').toLowerCase().includes('ajudante')
+    );
 
-    // Adiciona diaristas da coleção 'diarias' (nova arquitetura)
+    // Adiciona diaristas da coleção 'diarias' (fonte única)
     try {
       const diarSnap = await db.collection('diarias').get();
       diarSnap.docs.forEach(d => {
