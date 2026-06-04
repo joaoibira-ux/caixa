@@ -9,8 +9,8 @@
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: #f0f5f0;
-      color: #1a2e1a;
+      background: #1a3322;
+      color: #c8e6c9;
       min-height: 100vh;
     }
 
@@ -200,11 +200,11 @@
     .card-resumo {
       flex: 1;
       min-width: 140px;
-      background: white;
+      background: #0d2318;
       border-radius: 12px;
       padding: 16px 20px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.07);
-      border-top: 4px solid #ccc;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+      border-top: 4px solid #2d5a2d;
     }
     .card-resumo.entrada  { border-top-color: #4caf50; }
     .card-resumo.saida    { border-top-color: #e53935; }
@@ -214,7 +214,7 @@
     .card-resumo .cr-label {
       font-size: 0.72rem;
       font-weight: 600;
-      color: #888;
+      color: #4a8a5a;
       text-transform: uppercase;
       letter-spacing: 0.06em;
       margin-bottom: 6px;
@@ -225,16 +225,16 @@
     }
     .card-resumo.entrada  .cr-valor { color: #2e7d32; }
     .card-resumo.saida    .cr-valor { color: #c62828; }
-    .card-resumo.saldo    .cr-valor { color: #1a3322; }
-    .card-resumo.cef      .cr-valor { color: #1565c0; }
+    .card-resumo.saldo    .cr-valor { color: #a5d6a7; }
+    .card-resumo.cef      .cr-valor { color: #64b5f6; }
     .card-resumo.inter    .cr-valor { color: #e65100; }
 
     /* ── TABELA ── */
     .tabela-wrap {
       margin: 16px 32px 32px;
-      background: white;
+      background: #0d2318;
       border-radius: 12px;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+      box-shadow: 0 2px 12px rgba(0,0,0,0.3);
       overflow: hidden;
     }
     .tabela-titulo {
@@ -287,24 +287,25 @@
     thead th.col-entrada { background: #1b5e20; }
     thead th.col-saida   { background: #b71c1c; }
     thead th.col-saldo   { background: #0d2e0d; }
-    tbody tr:nth-child(even) { background: #f9fdf9; }
-    tbody tr:hover { background: #e8f5e9; }
+    tbody tr:nth-child(even) { background: rgba(255,255,255,0.04); }
+    tbody tr:hover { background: rgba(165,214,167,0.08); }
     tbody td {
       padding: 11px 14px;
       font-size: 0.88rem;
-      border-bottom: 1px solid #e8f5e9;
+      border-bottom: 1px solid rgba(165,214,167,0.1);
       vertical-align: middle;
+      color: #c8e6c9;
     }
     .badge {
-      background: #e8f5e9;
-      color: #2e7d32;
+      background: rgba(46,125,50,0.3);
+      color: #a5d6a7;
       border-radius: 4px;
       padding: 2px 7px;
       font-size: 0.72rem;
       font-weight: 700;
     }
-    .badge.joao { background: #fff3e0; color: #e65100; }
-    .badge.transf { background: #f3e5f5; color: #6a1b9a; }
+    .badge.joao { background: rgba(230,81,0,0.25); color: #ffb74d; }
+    .badge.transf { background: rgba(106,27,154,0.3); color: #ce93d8; }
     .col-entrada-val {
       color: #2e7d32;
       font-weight: 700;
@@ -639,7 +640,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script>
-  const VERSAO = "1.36";
+  const VERSAO = "1.37";
 
   async function enviarTelegram(btn) {
     btn.disabled = true;
