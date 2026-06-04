@@ -7,7 +7,7 @@ const firebaseConfig = {
   appId: "1:472820177992:web:2e1b98c9f6ac3a823d0c7d"
 };
 
-const VERSAO_CAIXA = "3.14";
+const VERSAO_CAIXA = "3.15";
 const HORACIO_BASE = -136306.23;
 const JOAO_BASE = -32250;
 document.getElementById("versao-caixa").textContent = "Versão: " + VERSAO_CAIXA;
@@ -225,7 +225,7 @@ async function fazerBackupDiario(docs) {
   // Carrega relatório em iframe oculto — ele detecta ?autobackup=1 e envia o screenshot
   const iframe = document.createElement('iframe');
   iframe.src = './relatorio.html?autobackup=1';
-  iframe.style.cssText = 'position:fixed;left:-9999px;top:0;width:390px;height:844px;border:none;visibility:hidden;';
+  iframe.style.cssText = 'position:fixed;left:-9999px;top:0;width:1200px;height:900px;border:none;visibility:hidden;';
   document.body.appendChild(iframe);
   setTimeout(() => { if (iframe.parentNode) iframe.parentNode.removeChild(iframe); }, 90000);
 }
