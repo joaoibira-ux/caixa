@@ -665,7 +665,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script>
-  const VERSAO = "1.41";
+  const VERSAO = "1.42";
 
   // ── Loading overlay ──────────────────────────────────────
   const _rlMsgs = [
@@ -684,6 +684,14 @@
     el.style.opacity = '0';
     setTimeout(() => { if (el) { el.textContent = _rlMsgs[_rlIdx]; el.style.opacity = '1'; } }, 300);
   }, 3000);
+
+  // Só esconde quando lancamentos E folhas/previsao estiverem prontos
+  const _rlFontes = { lancamentos: false, folhas: false };
+  function _verificarTudo() {
+    if (_rlFontes.lancamentos && _rlFontes.folhas) esconderLoadingRelatorio();
+  }
+  // Segurança: esconde depois de 12s no máximo
+  setTimeout(() => esconderLoadingRelatorio(), 12000);
 
   function esconderLoadingRelatorio() {
     clearInterval(_rlTimer);
@@ -793,7 +801,8 @@
   function pararTimerRedeLenta() {
     clearTimeout(_loadingTimer);
     _loadingTimer = null;
-    esconderLoadingRelatorio();
+    _rlFontes.lancamentos = true;
+    _verificarTudo();
   }
 
   document.getElementById("data-geracao").textContent =
@@ -1202,6 +1211,8 @@
           <span>${fmt(totalLiq)}</span>
         </div>
       </div>`;
+    _rlFontes.folhas = true;
+    _verificarTudo();
   });
 </script>
 <div class="rotate-overlay" id="rotate-overlay">
