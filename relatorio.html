@@ -665,7 +665,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script>
-  const VERSAO = "1.43";
+  const VERSAO = "1.44";
 
   // ── Loading overlay ──────────────────────────────────────
   const _rlMsgs = [
@@ -811,7 +811,11 @@
   function isoDate(daysAgo) {
     const d = new Date();
     d.setDate(d.getDate() - daysAgo);
-    return d.toISOString().split('T')[0];
+    // Usa data local (não UTC) para evitar bug de fuso horário após 21h no Brasil
+    const yyyy = d.getFullYear();
+    const mm   = String(d.getMonth() + 1).padStart(2, '0');
+    const dd   = String(d.getDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}`;
   }
 
   // Filtro inicial: ontem + hoje
