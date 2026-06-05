@@ -287,8 +287,8 @@
     thead th.col-entrada { background: #1b5e20; }
     thead th.col-saida   { background: #b71c1c; }
     thead th.col-saldo   { background: #0d2e0d; }
-    tbody tr:nth-child(even) { background: rgba(255,255,255,0.04); }
-    tbody tr:hover { background: rgba(165,214,167,0.08); }
+    tbody tr { background: rgba(255,255,255,0.04); }
+    tbody tr:hover { background: rgba(165,214,167,0.1); }
     tbody td {
       padding: 11px 14px;
       font-size: 0.88rem;
@@ -665,7 +665,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script>
-  const VERSAO = "1.44";
+  const VERSAO = "1.45";
 
   // ── Loading overlay ──────────────────────────────────────
   const _rlMsgs = [
