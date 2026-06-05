@@ -665,7 +665,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script>
-  const VERSAO = "1.46";
+  const VERSAO = "1.47";
 
   // ── Loading overlay ──────────────────────────────────────
   const _rlMsgs = [
@@ -1154,35 +1154,33 @@
       g.isEncarregado || !(g.funcionario?.cargo || '').toLowerCase().includes('ajudante')
     );
 
-    // Adiciona diaristas da coleção 'diarias' (fonte única)
-    try {
-      const diarSnap = await db.collection('diarias').get();
-      diarSnap.docs.forEach(d => {
-        const doc = d.data();
-        const subtotal = (doc.dias || []).reduce((s, dia) => s + Number(dia.valor || 0), 0);
-        if (subtotal > 0) grupos = [...grupos, {
-          isEncarregado: false,
-          funcionario: { nome: doc.funcionarioNome, cargo: doc.cargo || 'Ajudante' },
-          subtotal
-        }];
-      });
-    } catch(e) {}
+    // Busca diaristas e adiantamentos em paralelo
+    const [diarSnap, adSnap] = await Promise.all([
+      db.collection('diarias').get().catch(() => null),
+      db.collection('lancamentos').where('origem','==','ANE->ADIANTAMENTO').get().catch(() => null)
+    ]);
 
-    if (!grupos.length) { el.innerHTML = ''; return; }
+    if (diarSnap) diarSnap.docs.forEach(d => {
+      const doc = d.data();
+      const subtotal = (doc.dias || []).reduce((s, dia) => s + Number(dia.valor || 0), 0);
+      if (subtotal > 0) grupos = [...grupos, {
+        isEncarregado: false,
+        funcionario: { nome: doc.funcionarioNome, cargo: doc.cargo || 'Ajudante' },
+        subtotal
+      }];
+    });
 
-    // Busca adiantamentos para cruzar com os funcionários
+    if (!grupos.length) { el.innerHTML = ''; _rlFontes.folhas = true; _verificarTudo(); return; }
+
     const adiantMap = new Map();
-    try {
-      const adSnap = await db.collection('lancamentos').where('origem','==','ANE->ADIANTAMENTO').get();
-      adSnap.docs.forEach(d => {
-        const r = d.data();
-        const desc = r.descricao || '';
-        if (!desc.startsWith('Adiantamento: ')) return;
-        const nome = desc.slice('Adiantamento: '.length).split(/\s*[—–\-]/)[0].trim().normalize('NFC');
-        if (!nome) return;
-        adiantMap.set(normNome(nome), (adiantMap.get(normNome(nome)) || 0) + (r.saida || 0));
-      });
-    } catch(e) {}
+    if (adSnap) adSnap.docs.forEach(d => {
+      const r = d.data();
+      const desc = r.descricao || '';
+      if (!desc.startsWith('Adiantamento: ')) return;
+      const nome = desc.slice('Adiantamento: '.length).split(/\s*[—–\-]/)[0].trim().normalize('NFC');
+      if (!nome) return;
+      adiantMap.set(normNome(nome), (adiantMap.get(normNome(nome)) || 0) + (r.saida || 0));
+    });
 
     let totalBruto = 0, totalAdiant = 0;
     const linhas = grupos.map(g => {
