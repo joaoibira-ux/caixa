@@ -665,7 +665,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script>
-  const VERSAO = "1.42";
+  const VERSAO = "1.43";
 
   // ── Loading overlay ──────────────────────────────────────
   const _rlMsgs = [
@@ -690,8 +690,8 @@
   function _verificarTudo() {
     if (_rlFontes.lancamentos && _rlFontes.folhas) esconderLoadingRelatorio();
   }
-  // Segurança: esconde depois de 12s no máximo
-  setTimeout(() => esconderLoadingRelatorio(), 12000);
+  // Segurança: esconde depois de 6s no máximo
+  setTimeout(() => esconderLoadingRelatorio(), 6000);
 
   function esconderLoadingRelatorio() {
     clearInterval(_rlTimer);
@@ -1141,10 +1141,10 @@
 
   db.collection('folhas').orderBy('criadoEm', 'desc').limit(1).onSnapshot(async snap => {
     const el = document.getElementById('previsao-folha');
-    if (!el) return;
-    if (snap.empty) { el.innerHTML = ''; return; }
+    if (!el) { _rlFontes.folhas = true; _verificarTudo(); return; }
+    if (snap.empty) { el.innerHTML = ''; _rlFontes.folhas = true; _verificarTudo(); return; }
     const folha = snap.docs[0].data();
-    if (folha.status === 'paga') { el.innerHTML = ''; return; }
+    if (folha.status === 'paga') { el.innerHTML = ''; _rlFontes.folhas = true; _verificarTudo(); return; }
     // Remove ajudantes do documento salvo — agora vêm da coleção 'diarias'
     let grupos = (folha.grupos || []).filter(g =>
       g.isEncarregado || !(g.funcionario?.cargo || '').toLowerCase().includes('ajudante')
