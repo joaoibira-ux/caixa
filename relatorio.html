@@ -464,7 +464,11 @@
       letter-spacing: normal;
       text-transform: none;
       padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
+    .prev-titulo-logo { height: 34px; width: 34px; object-fit: contain; border-radius: 6px; flex-shrink: 0; }
     .prev-cols { grid-template-columns: 1fr 120px 120px 120px; }
     .prev-header { display: grid; padding: 5px 16px; border-bottom: 1px solid rgba(165,214,167,0.15); }
     .prev-header span { font-size: 0.6rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #4a8a5a; text-align: right; white-space: nowrap; }
@@ -675,7 +679,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script>
-  const VERSAO = "1.50";
+  const VERSAO = "1.51";
 
   // ── Loading overlay ──────────────────────────────────────
   const _rlMsgs = [
@@ -1211,7 +1215,10 @@
     const totalLiq = totalBruto - totalAdiant;
     el.innerHTML = `
       <div class="previsao-card">
-        <div class="prev-titulo">Previsão da Folha de Pagamento</div>
+        <div class="prev-titulo">
+          <img src="./Logo-gw.png" alt="GW" class="prev-titulo-logo">
+          <span>Previsão da Folha de Pagamento</span>
+        </div>
         <div class="prev-header prev-cols">
           <span>Funcionário</span><span>Bruto</span><span>Adiant.</span><span>Líquido</span>
         </div>
