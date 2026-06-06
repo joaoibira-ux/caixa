@@ -456,7 +456,15 @@
     #previsao-folha.previsao-wrap { margin-top: 28px; }
     .previsao-card { background: #1a3322; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
     .prev-titulo { background: #0d2318; color: #a5d6a7; padding: 10px 16px; font-size: 0.72rem; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; }
-    #previsao-folha .prev-titulo { padding-top: 18px; }
+    #previsao-folha .prev-titulo {
+      background: #1a3322;
+      color: #fff;
+      font-size: 1.1rem;
+      font-weight: 700;
+      letter-spacing: normal;
+      text-transform: none;
+      padding: 12px 16px;
+    }
     .prev-cols { grid-template-columns: 1fr 120px 120px 120px; }
     .prev-header { display: grid; padding: 5px 16px; border-bottom: 1px solid rgba(165,214,167,0.15); }
     .prev-header span { font-size: 0.6rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #4a8a5a; text-align: right; white-space: nowrap; }
@@ -667,7 +675,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script>
-  const VERSAO = "1.49";
+  const VERSAO = "1.50";
 
   // ── Loading overlay ──────────────────────────────────────
   const _rlMsgs = [
