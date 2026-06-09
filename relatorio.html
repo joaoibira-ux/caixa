@@ -679,7 +679,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script>
-  const VERSAO = "1.52";
+  const VERSAO = "1.53";
 
   // ── Loading overlay ──────────────────────────────────────
   const _rlMsgs = [
@@ -867,7 +867,8 @@
       // antes do início: acumula saldo anterior
       if (dataInicio && dataDoc && dataDoc < dataInicio) {
         temAnterior = true;
-        if (r.origem !== "ANE->GW-INTER") {
+        // exclui transferências internas e lançamentos contábeis (não são caixa real)
+        if (r.origem !== "ANE->GW-INTER" && r.origem !== "JOAO->CREDITO DE PROLABORE") {
           saldoAnterior += (r.entrada || 0) - (r.saida || 0);
         }
         return;
@@ -914,20 +915,22 @@
     }
 
     tbody.innerHTML = rowAnterior + docs.map(r => {
-      const isTransf = r.origem === "ANE->GW-INTER";
+      const isTransf   = r.origem === "ANE->GW-INTER";
+      const isContabil = r.origem === "JOAO->CREDITO DE PROLABORE";
       const entrada  = isTransf ? 0 : (r.entrada || 0);
       const saida    = isTransf ? 0 : (r.saida || 0);
 
-      if (!isTransf) {
+      if (!isTransf && !isContabil) {
         totalE += entrada;
         totalS += saida;
         if (r.origem === "ANE" || r.origem === "ANE->HORACIO")  { cefE += entrada; cefS += saida; }
         if (r.origem === "JOAO") { interE += entrada; interS += saida; }
         saldoAcum += entrada - saida;
-      } else {
+      } else if (isTransf) {
         cefS   += r.saida || 0;
         interE += r.saida || 0;
       }
+      // isContabil (JOAO->CREDITO DE PROLABORE): exibido mas não altera saldoAcum
 
       const badgeCls = r.origem === "JOAO" ? "joao" : (isTransf ? "transf" : "");
       const saldoCls = saldoAcum >= 0 ? "pos" : "neg";
