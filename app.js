@@ -7,7 +7,7 @@ const firebaseConfig = {
   appId: "1:472820177992:web:2e1b98c9f6ac3a823d0c7d"
 };
 
-const VERSAO_CAIXA = "3.19";
+const VERSAO_CAIXA = "3.20";
 const HORACIO_BASE = -136306.23;
 const JOAO_BASE = -32250;
 document.getElementById("versao-caixa").textContent = "Versão: " + VERSAO_CAIXA;
@@ -190,50 +190,9 @@ function deletar(id) {
   }).then(() => col.doc(id).delete());
 }
 
-let backupFeito = false;
-
-async function fazerBackupDiario(docs) {
-  if (backupFeito) return;
-  backupFeito = true;
-
-  const agora = new Date();
-  const chave = `${agora.getFullYear()}-${String(agora.getMonth()+1).padStart(2,"0")}-${String(agora.getDate()).padStart(2,"0")}`;
-
-  // Controle no Firestore — compartilhado entre todos os dispositivos
-  const configRef = db.collection("config").doc("backupDiario");
-  try {
-    const snap = await configRef.get();
-    if (snap.exists && snap.data().ultimaData === chave) return;
-    await configRef.set({ ultimaData: chave });
-  } catch(e) {
-    return;
-  }
-
-  const ontem = new Date(agora);
-  ontem.setDate(ontem.getDate() - 1);
-  const dd   = String(ontem.getDate()).padStart(2, "0");
-  const mm   = String(ontem.getMonth() + 1).padStart(2, "0");
-  const yyyy = String(ontem.getFullYear());
-  const dataBR       = `${dd}/${mm}/${yyyy}`;
-  const dataSemBarra = `${dd}${mm}${yyyy}`;
-
-  const lancamentos = docs.map(d => d.data())
-    .filter(r => r.data === dataBR || r.data === dataSemBarra);
-
-  if (lancamentos.length === 0) return;
-
-  // Carrega relatório em iframe oculto — ele detecta ?autobackup=1 e envia o screenshot
-  const iframe = document.createElement('iframe');
-  iframe.src = './relatorio.html?autobackup=1';
-  iframe.style.cssText = 'position:fixed;left:-9999px;top:0;width:1200px;height:900px;border:none;visibility:hidden;';
-  document.body.appendChild(iframe);
-  setTimeout(() => { if (iframe.parentNode) iframe.parentNode.removeChild(iframe); }, 90000);
-}
-
 // Escuta em tempo real — atualiza os dois iPhones automaticamente
 col.orderBy("criadoEm", "asc").onSnapshot(snapshot => {
   render(snapshot.docs);
-  fazerBackupDiario(snapshot.docs);
 }, err => {
   console.error(err);
   document.getElementById("lista").innerHTML =

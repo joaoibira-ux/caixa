@@ -679,7 +679,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script>
-  const VERSAO = "1.53";
+  const VERSAO = "1.54";
 
   // ── Loading overlay ──────────────────────────────────────
   const _rlMsgs = [
@@ -800,6 +800,35 @@
     return new Date(y, m - 1, d);
   }
 
+  // Backup diário automático: disparado pelo menu GW ao acessar o sistema (?autobackup=1)
+  async function verificarBackupDiario() {
+    const agora = new Date();
+    const chave = `${agora.getFullYear()}-${String(agora.getMonth()+1).padStart(2,"0")}-${String(agora.getDate()).padStart(2,"0")}`;
+
+    // Controle no Firestore — compartilhado entre todos os dispositivos
+    const configRef = db.collection("config").doc("backupDiario");
+    try {
+      const snap = await configRef.get();
+      if (snap.exists && snap.data().ultimaData === chave) return;
+      await configRef.set({ ultimaData: chave });
+    } catch(e) {
+      return;
+    }
+
+    const ontem = new Date(agora);
+    ontem.setDate(ontem.getDate() - 1);
+    const dd   = String(ontem.getDate()).padStart(2, "0");
+    const mm   = String(ontem.getMonth() + 1).padStart(2, "0");
+    const yyyy = String(ontem.getFullYear());
+    const dataBR       = `${dd}/${mm}/${yyyy}`;
+    const dataSemBarra = `${dd}${mm}${yyyy}`;
+
+    const temLancamentosOntem = todosOsDocs.some(r => r.data === dataBR || r.data === dataSemBarra);
+    if (!temLancamentosOntem) return;
+
+    setTimeout(() => enviarTelegram({ disabled: false, textContent: '' }), 3000);
+  }
+
   let todosOsDocs = [];
   let _loadingTimer = null;
 
@@ -845,7 +874,7 @@
     aplicarFiltro();
     if (new URLSearchParams(window.location.search).get('autobackup') === '1' && !window._autobackupFeito) {
       window._autobackupFeito = true;
-      setTimeout(() => enviarTelegram({ disabled: false, textContent: '' }), 3000);
+      verificarBackupDiario();
     }
   });
 
