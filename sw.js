@@ -1,9 +1,13 @@
-const VERSION = "caixa-v62";
+const VERSION = "caixa-v63";
 const ASSETS = [
   "./index.html",
   "./style.css?v=29",
-  "./app.js?v=57",
-  "./manifest.json"
+  "./app.js?v=58",
+  "./manifest.json",
+  "./Logo-gw.png",
+  "./Aviso iPhone.png",
+  "./Aviso Adroide.png",
+  "./instrucoes_sistema_gw.png"
 ];
 
 self.addEventListener("install", e => {
