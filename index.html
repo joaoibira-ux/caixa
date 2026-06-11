@@ -42,10 +42,7 @@
           || window.matchMedia('(display-mode: standalone)').matches
           || window.matchMedia('(display-mode: fullscreen)').matches;
       }
-      function ehMobile() {
-        return /iPad|iPhone|iPod|Android/.test(navigator.userAgent) && !window.MSStream;
-      }
-      if (ehMobile() && !estaComoApp()) {
+      if (!estaComoApp()) {
         document.documentElement.classList.add('gw-blocked');
       }
     })();
@@ -164,7 +161,7 @@
   </div>
 </div>
 
-<script src="./app.js?v=63"></script>
+<script src="./app.js?v=64"></script>
 <script>
   if (document.documentElement.classList.contains('gw-blocked')) {
     (function() {
