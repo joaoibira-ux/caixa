@@ -7,7 +7,7 @@ const firebaseConfig = {
   appId: "1:472820177992:web:2e1b98c9f6ac3a823d0c7d"
 };
 
-const VERSAO_CAIXA = "3.25";
+const VERSAO_CAIXA = "3.26";
 const HORACIO_BASE = -136306.23;
 const JOAO_BASE = -32250;
 document.getElementById("versao-caixa").textContent = "Versão: " + VERSAO_CAIXA;
@@ -110,6 +110,8 @@ function render(docs) {
         interE += r.entrada || 0;
       } else if (r.origem === "JOAO->BAIXA CTAS A PAGAR") {
         interS += r.saida || 0;
+      } else if (r.origem === "ANE->CREDITO A REPASSAR P BBS FOMENTO") {
+        cefE += r.entrada || 0;
       }
     }
   });
@@ -243,6 +245,8 @@ document.getElementById("form").addEventListener("submit", function(e) {
   } else if (origem === "JOAO->BAIXA CTAS A PAGAR") {
     if (!contaPagarSelecionada) { alert("Selecione uma conta a pagar. Selecione a origem novamente."); return; }
     baixarContaAPagar(data, desc, saida);
+  } else if (origem === "ANE->CREDITO A REPASSAR P BBS FOMENTO") {
+    criarCreditoRepassarBBS(data, desc, entrada);
   } else {
     col.add({ data, origem, descricao: desc, entrada, saida, criadoEm: firebase.firestore.FieldValue.serverTimestamp() });
   }
@@ -295,6 +299,10 @@ document.getElementById("f-origem").addEventListener("change", function() {
     if (autoDescs.includes(desc.value)) desc.value = "";
     abrirPickerContaPagar();
     return;
+  } else if (this.value === "ANE->CREDITO A REPASSAR P BBS FOMENTO") {
+    if (autoDescs.includes(desc.value)) desc.value = "";
+    saida.value = "";
+    saida.readOnly = true;
   } else if (this.value === "ANE->GW-INTER") {
     desc.value = "Transferência Pix: CEF -> INTER";
   } else if (this.value === "ANE->HORACIO") {
@@ -563,6 +571,24 @@ function criarContaAPagar(data, desc, entrada) {
 
   batch.set(db.collection("contasPagar").doc(), {
     numero, data, descricao: desc, valor: entrada, status: "aberto",
+    criadoEm: firebase.firestore.FieldValue.serverTimestamp()
+  });
+
+  batch.commit().catch(() => alert("Erro ao criar conta a pagar. Tente novamente."));
+}
+
+function criarCreditoRepassarBBS(data, desc, entrada) {
+  const numero = String(Object.keys(docsCache).length + 1).padStart(4, "0");
+  const batch = db.batch();
+
+  batch.set(col.doc(), {
+    data, origem: "ANE->CREDITO A REPASSAR P BBS FOMENTO", descricao: desc,
+    entrada, saida: 0,
+    criadoEm: firebase.firestore.FieldValue.serverTimestamp()
+  });
+
+  batch.set(db.collection("contasPagar").doc(), {
+    numero, data: hoje(), descricao: desc, valor: entrada, status: "aberto",
     criadoEm: firebase.firestore.FieldValue.serverTimestamp()
   });
 

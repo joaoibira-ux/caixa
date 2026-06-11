@@ -685,7 +685,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script>
-  const VERSAO = "1.55";
+  const VERSAO = "1.56";
 
   // ── Loading overlay ──────────────────────────────────────
   const _rlMsgs = [
@@ -1044,6 +1044,8 @@
       } else if (r.origem === "JOAO") {
         interE += r.entrada || 0;
         interS += r.saida   || 0;
+      } else if (r.origem === "ANE->CREDITO A REPASSAR P BBS FOMENTO") {
+        cefE += r.entrada || 0;
       }
     });
     const joao    = JOAO_BASE + joaoE;
