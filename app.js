@@ -7,7 +7,7 @@ const firebaseConfig = {
   appId: "1:472820177992:web:2e1b98c9f6ac3a823d0c7d"
 };
 
-const VERSAO_CAIXA = "3.23";
+const VERSAO_CAIXA = "3.24";
 const HORACIO_BASE = -136306.23;
 const JOAO_BASE = -32250;
 document.getElementById("versao-caixa").textContent = "Versão: " + VERSAO_CAIXA;
@@ -49,6 +49,8 @@ let folhaParaPagar = null;
 let descPrefix     = null;
 let contasReceberCache    = {};
 let contaReceberSelecionada = null;
+let contasPagarCache    = {};
+let contaPagarSelecionada = null;
 
 function nomeAbrev(nome) {
   const n = (nome || "").toLowerCase();
@@ -104,6 +106,10 @@ function render(docs) {
         interS += r.saida || 0;
       } else if (r.origem === "JOAO->BAIXA CTAS A RECEBER") {
         interE += r.entrada || 0;
+      } else if (r.origem === "JOAO->CTAS A PAGAR") {
+        interE += r.entrada || 0;
+      } else if (r.origem === "JOAO->BAIXA CTAS A PAGAR") {
+        interS += r.saida || 0;
       }
     }
   });
@@ -232,6 +238,11 @@ document.getElementById("form").addEventListener("submit", function(e) {
   } else if (origem === "JOAO->BAIXA CTAS A RECEBER") {
     if (!contaReceberSelecionada) { alert("Selecione uma conta a receber. Selecione a origem novamente."); return; }
     baixarContaAReceber(data, desc, entrada);
+  } else if (origem === "JOAO->CTAS A PAGAR") {
+    criarContaAPagar(data, desc, entrada);
+  } else if (origem === "JOAO->BAIXA CTAS A PAGAR") {
+    if (!contaPagarSelecionada) { alert("Selecione uma conta a pagar. Selecione a origem novamente."); return; }
+    baixarContaAPagar(data, desc, saida);
   } else {
     col.add({ data, origem, descricao: desc, entrada, saida, criadoEm: firebase.firestore.FieldValue.serverTimestamp() });
   }
@@ -244,6 +255,7 @@ document.getElementById("form").addEventListener("submit", function(e) {
   folhaParaPagar = null;
   descPrefix = null;
   contaReceberSelecionada = null;
+  contaPagarSelecionada = null;
   toggleForm();
 });
 
@@ -269,6 +281,7 @@ document.getElementById("f-origem").addEventListener("change", function() {
   folhaParaPagar = null;
   descPrefix = null;
   contaReceberSelecionada = null;
+  contaPagarSelecionada = null;
 
   if (this.value === "ANE->ADIANTAMENTO") {
     if (autoDescs.includes(desc.value)) desc.value = "";
@@ -277,6 +290,10 @@ document.getElementById("f-origem").addEventListener("change", function() {
   } else if (this.value === "JOAO->BAIXA CTAS A RECEBER") {
     if (autoDescs.includes(desc.value)) desc.value = "";
     abrirPickerContaReceber();
+    return;
+  } else if (this.value === "JOAO->BAIXA CTAS A PAGAR") {
+    if (autoDescs.includes(desc.value)) desc.value = "";
+    abrirPickerContaPagar();
     return;
   } else if (this.value === "ANE->GW-INTER") {
     desc.value = "Transferência Pix: CEF -> INTER";
@@ -359,9 +376,34 @@ function abrirPickerContaReceber() {
   });
 }
 
+function abrirPickerContaPagar() {
+  const overlay = document.getElementById("picker-overlay");
+  const lista   = document.getElementById("picker-lista");
+  document.getElementById("picker-titulo").textContent = "Pagamento — Conta a Pagar";
+  lista.innerHTML = '<p style="color:#888;padding:12px;text-align:center">Carregando...</p>';
+  overlay.classList.add("active");
+  db.collection("contasPagar").get().then(snap => {
+    contasPagarCache = {};
+    const abertas = snap.docs.filter(d => d.data().status !== "baixado");
+    if (!abertas.length) {
+      lista.innerHTML = '<p style="color:#888;padding:12px;text-align:center">Nenhuma conta a pagar em aberto.</p>';
+      return;
+    }
+    lista.innerHTML = abertas.map(d => {
+      const c = d.data();
+      contasPagarCache[d.id] = c;
+      return `<div class="picker-item" data-id="${d.id}" onclick="selecionarContaPagar(this.dataset.id)">
+        ${c.numero ? `Nº ${escHtml(c.numero)} — ` : ""}${escHtml(c.descricao)}<span class="picker-cargo-badge">${fmtMoeda(c.valor)}</span>
+      </div>`;
+    }).join("");
+  }).catch(() => {
+    lista.innerHTML = '<p style="color:#c62828;padding:12px;text-align:center">Erro ao carregar contas a pagar.</p>';
+  });
+}
+
 function fecharPicker() {
   document.getElementById("picker-overlay").classList.remove("active");
-  if (!descPrefix && !contaReceberSelecionada) {
+  if (!descPrefix && !contaReceberSelecionada && !contaPagarSelecionada) {
     document.getElementById("f-origem").value = "";
   }
 }
@@ -373,6 +415,28 @@ function selecionarFuncionario(nome) {
   desc.value = descPrefix;
   desc.focus();
   desc.setSelectionRange(descPrefix.length, descPrefix.length);
+}
+
+function selecionarContaReceber(id) {
+  document.getElementById("picker-overlay").classList.remove("active");
+  const c = contasReceberCache[id];
+  contaReceberSelecionada = { id, conta: c };
+  const desc    = document.getElementById("f-desc");
+  const entrada = document.getElementById("f-entrada");
+  desc.value = `Baixa Cta a Receber${c.numero ? " Nº " + c.numero : ""}: ${c.descricao}`;
+  entrada.value = (c.valor || 0).toFixed(2).replace(".", ",");
+  entrada.readOnly = true;
+}
+
+function selecionarContaPagar(id) {
+  document.getElementById("picker-overlay").classList.remove("active");
+  const c = contasPagarCache[id];
+  contaPagarSelecionada = { id, conta: c };
+  const desc  = document.getElementById("f-desc");
+  const saida = document.getElementById("f-saida");
+  desc.value = `Pagamento Cta a Pagar${c.numero ? " Nº " + c.numero : ""}: ${c.descricao}`;
+  saida.value = (c.valor || 0).toFixed(2).replace(".", ",");
+  saida.readOnly = true;
 }
 
 document.getElementById("f-desc").addEventListener("keydown", function(e) {
@@ -485,6 +549,42 @@ function baixarContaAReceber(data, desc, entrada) {
   });
 
   batch.commit().catch(() => alert("Erro ao baixar conta a receber. Tente novamente."));
+}
+
+function criarContaAPagar(data, desc, entrada) {
+  const numero = String(Object.keys(docsCache).length + 1).padStart(4, "0");
+  const batch = db.batch();
+
+  batch.set(col.doc(), {
+    data, origem: "JOAO->CTAS A PAGAR", descricao: desc,
+    entrada, saida: 0,
+    criadoEm: firebase.firestore.FieldValue.serverTimestamp()
+  });
+
+  batch.set(db.collection("contasPagar").doc(), {
+    numero, data, descricao: desc, valor: entrada, status: "aberto",
+    criadoEm: firebase.firestore.FieldValue.serverTimestamp()
+  });
+
+  batch.commit().catch(() => alert("Erro ao criar conta a pagar. Tente novamente."));
+}
+
+function baixarContaAPagar(data, desc, saida) {
+  const { id, conta } = contaPagarSelecionada;
+  const numero = String(Object.keys(docsCache).length + 1).padStart(4, "0");
+  const batch = db.batch();
+
+  batch.set(col.doc(), {
+    data, origem: "JOAO->BAIXA CTAS A PAGAR", descricao: desc,
+    entrada: 0, saida,
+    criadoEm: firebase.firestore.FieldValue.serverTimestamp()
+  });
+
+  batch.update(db.collection("contasPagar").doc(id), {
+    status: "baixado", dataBaixa: data, numeroBaixa: numero
+  });
+
+  batch.commit().catch(() => alert("Erro ao baixar conta a pagar. Tente novamente."));
 }
 
 function toggleForm() {
