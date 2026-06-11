@@ -124,6 +124,8 @@
         <option value="ANE->ADIANTAMENTO">ANE → ADIANTAMENTO</option>
         <option value="JOAO->CREDITO DE PROLABORE">JOAO → CRÉDITO DE PRÓ-LABORE</option>
         <option value="JOAO->JOAO">JOÃO → JOÃO</option>
+        <option value="JOAO->CTAS A RECEBER">JOÃO → CTAS A RECEBER</option>
+        <option value="JOAO->BAIXA CTAS A RECEBER">JOÃO → BAIXA CTAS A RECEBER</option>
       </select>
     </div>
     <div class="full">
@@ -151,7 +153,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <div class="modal-overlay" id="picker-overlay">
   <div class="modal">
-    <h3 style="color:#1565c0;margin-bottom:12px">Adiantamento — Funcionário</h3>
+    <h3 id="picker-titulo" style="color:#1565c0;margin-bottom:12px">Adiantamento — Funcionário</h3>
     <div id="picker-lista" style="max-height:300px;overflow-y:auto;border-radius:8px;border:1px solid #e0e0e0;margin-bottom:14px"></div>
     <div class="modal-btns">
       <button class="btn-cancelar" onclick="fecharPicker()">Cancelar</button>
@@ -159,7 +161,7 @@
   </div>
 </div>
 
-<script src="./app.js?v=59"></script>
+<script src="./app.js?v=60"></script>
 <script>
   if (document.documentElement.classList.contains('gw-blocked')) {
     (function() {

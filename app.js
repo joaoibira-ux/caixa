@@ -7,7 +7,7 @@ const firebaseConfig = {
   appId: "1:472820177992:web:2e1b98c9f6ac3a823d0c7d"
 };
 
-const VERSAO_CAIXA = "3.22";
+const VERSAO_CAIXA = "3.23";
 const HORACIO_BASE = -136306.23;
 const JOAO_BASE = -32250;
 document.getElementById("versao-caixa").textContent = "Versão: " + VERSAO_CAIXA;
@@ -47,6 +47,8 @@ let docsCache      = {};
 let ultimoDocId    = null;
 let folhaParaPagar = null;
 let descPrefix     = null;
+let contasReceberCache    = {};
+let contaReceberSelecionada = null;
 
 function nomeAbrev(nome) {
   const n = (nome || "").toLowerCase();
@@ -98,6 +100,10 @@ function render(docs) {
         interS += r.saida || 0;
       } else if (r.origem === "ANE->ADIANTAMENTO") {
         cefS += r.saida || 0;
+      } else if (r.origem === "JOAO->CTAS A RECEBER") {
+        interS += r.saida || 0;
+      } else if (r.origem === "JOAO->BAIXA CTAS A RECEBER") {
+        interE += r.entrada || 0;
       }
     }
   });
@@ -221,6 +227,11 @@ document.getElementById("form").addEventListener("submit", function(e) {
   if (origem === "ANE->FOLHA DE PAGAMENTO") {
     if (!folhaParaPagar) { alert("Folha não carregada. Selecione a origem novamente."); return; }
     pagarFolha(data, desc, saida);
+  } else if (origem === "JOAO->CTAS A RECEBER") {
+    criarContaAReceber(data, desc, saida);
+  } else if (origem === "JOAO->BAIXA CTAS A RECEBER") {
+    if (!contaReceberSelecionada) { alert("Selecione uma conta a receber. Selecione a origem novamente."); return; }
+    baixarContaAReceber(data, desc, entrada);
   } else {
     col.add({ data, origem, descricao: desc, entrada, saida, criadoEm: firebase.firestore.FieldValue.serverTimestamp() });
   }
@@ -229,8 +240,10 @@ document.getElementById("form").addEventListener("submit", function(e) {
   document.getElementById("f-entrada").value = "";
   document.getElementById("f-saida").value = "";
   document.getElementById("f-saida").readOnly = false;
+  document.getElementById("f-entrada").readOnly = false;
   folhaParaPagar = null;
   descPrefix = null;
+  contaReceberSelecionada = null;
   toggleForm();
 });
 
@@ -245,18 +258,25 @@ document.getElementById("form").addEventListener("submit", function(e) {
 document.getElementById("f-data").value = hoje();
 
 document.getElementById("f-origem").addEventListener("change", function() {
-  const desc   = document.getElementById("f-desc");
-  const saida  = document.getElementById("f-saida");
+  const desc    = document.getElementById("f-desc");
+  const saida   = document.getElementById("f-saida");
+  const entrada = document.getElementById("f-entrada");
   const autoDescs = ["Transferência Pix: CEF -> INTER", "Transferência Pix: CEF -> HORÁCIO", "Pró-labore JOAO: CEF -> JOAO", "Transferência Pix: INTER -> HORÁCIO", "Folha de Pagamento da Produção", "Crédito Pró-labore: João Albérico", "Pró-labore JOAO: INTER -> JOAO"];
 
-  // Sempre reseta o campo saída e prefixo ao trocar origem
+  // Sempre reseta os campos entrada/saída e prefixo ao trocar origem
   saida.readOnly = false;
+  entrada.readOnly = false;
   folhaParaPagar = null;
   descPrefix = null;
+  contaReceberSelecionada = null;
 
   if (this.value === "ANE->ADIANTAMENTO") {
     if (autoDescs.includes(desc.value)) desc.value = "";
     abrirPickerFuncionario();
+    return;
+  } else if (this.value === "JOAO->BAIXA CTAS A RECEBER") {
+    if (autoDescs.includes(desc.value)) desc.value = "";
+    abrirPickerContaReceber();
     return;
   } else if (this.value === "ANE->GW-INTER") {
     desc.value = "Transferência Pix: CEF -> INTER";
@@ -294,6 +314,7 @@ document.getElementById("f-origem").addEventListener("change", function() {
 function abrirPickerFuncionario() {
   const overlay = document.getElementById("picker-overlay");
   const lista   = document.getElementById("picker-lista");
+  document.getElementById("picker-titulo").textContent = "Adiantamento — Funcionário";
   lista.innerHTML = '<p style="color:#888;padding:12px;text-align:center">Carregando...</p>';
   overlay.classList.add("active");
   db.collection("funcionarios").orderBy("nome").get().then(snap => {
@@ -313,9 +334,34 @@ function abrirPickerFuncionario() {
   });
 }
 
+function abrirPickerContaReceber() {
+  const overlay = document.getElementById("picker-overlay");
+  const lista   = document.getElementById("picker-lista");
+  document.getElementById("picker-titulo").textContent = "Baixa — Conta a Receber";
+  lista.innerHTML = '<p style="color:#888;padding:12px;text-align:center">Carregando...</p>';
+  overlay.classList.add("active");
+  db.collection("contasReceber").get().then(snap => {
+    contasReceberCache = {};
+    const abertas = snap.docs.filter(d => d.data().status !== "baixado");
+    if (!abertas.length) {
+      lista.innerHTML = '<p style="color:#888;padding:12px;text-align:center">Nenhuma conta a receber em aberto.</p>';
+      return;
+    }
+    lista.innerHTML = abertas.map(d => {
+      const c = d.data();
+      contasReceberCache[d.id] = c;
+      return `<div class="picker-item" data-id="${d.id}" onclick="selecionarContaReceber(this.dataset.id)">
+        ${c.numero ? `Nº ${escHtml(c.numero)} — ` : ""}${escHtml(c.descricao)}<span class="picker-cargo-badge">${fmtMoeda(c.valor)}</span>
+      </div>`;
+    }).join("");
+  }).catch(() => {
+    lista.innerHTML = '<p style="color:#c62828;padding:12px;text-align:center">Erro ao carregar contas a receber.</p>';
+  });
+}
+
 function fecharPicker() {
   document.getElementById("picker-overlay").classList.remove("active");
-  if (!descPrefix) {
+  if (!descPrefix && !contaReceberSelecionada) {
     document.getElementById("f-origem").value = "";
   }
 }
@@ -403,6 +449,42 @@ function pagarFolha(data, desc, saida) {
 
     batch.commit().catch(() => alert("Erro ao registrar pagamento. Tente novamente."));
   });
+}
+
+function criarContaAReceber(data, desc, saida) {
+  const numero = String(Object.keys(docsCache).length + 1).padStart(4, "0");
+  const batch = db.batch();
+
+  batch.set(col.doc(), {
+    data, origem: "JOAO->CTAS A RECEBER", descricao: desc,
+    entrada: 0, saida,
+    criadoEm: firebase.firestore.FieldValue.serverTimestamp()
+  });
+
+  batch.set(db.collection("contasReceber").doc(), {
+    numero, data, descricao: desc, valor: saida, status: "aberto",
+    criadoEm: firebase.firestore.FieldValue.serverTimestamp()
+  });
+
+  batch.commit().catch(() => alert("Erro ao criar conta a receber. Tente novamente."));
+}
+
+function baixarContaAReceber(data, desc, entrada) {
+  const { id, conta } = contaReceberSelecionada;
+  const numero = String(Object.keys(docsCache).length + 1).padStart(4, "0");
+  const batch = db.batch();
+
+  batch.set(col.doc(), {
+    data, origem: "JOAO->BAIXA CTAS A RECEBER", descricao: desc,
+    entrada, saida: 0,
+    criadoEm: firebase.firestore.FieldValue.serverTimestamp()
+  });
+
+  batch.update(db.collection("contasReceber").doc(id), {
+    status: "baixado", dataBaixa: data, numeroBaixa: numero
+  });
+
+  batch.commit().catch(() => alert("Erro ao baixar conta a receber. Tente novamente."));
 }
 
 function toggleForm() {
