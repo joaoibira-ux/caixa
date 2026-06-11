@@ -171,6 +171,10 @@ input:focus, select:focus {
   font-size: 0.75rem;
   color: #888;
 }
+.card-meta .numero {
+  font-weight: 600;
+  color: #aaa;
+}
 .badge {
   background: #e3f2fd;
   color: #1565c0;

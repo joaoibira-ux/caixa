@@ -326,6 +326,11 @@
     .col-saldo-val.pos { color: #a5d6a7; }
     .col-saldo-val.neg { color: #ef9a9a; }
     td.vazio { color: #4a8a5a; text-align: right; }
+    .col-numero {
+      color: #4a8a5a;
+      font-weight: 600;
+      white-space: nowrap;
+    }
 
     /* ── RODAPÉ TABELA ── */
     .row-totais td {
@@ -632,6 +637,7 @@
   <table id="tabela">
     <thead>
       <tr>
+        <th>Nº</th>
         <th>Data</th>
         <th>Origem</th>
         <th>Descrição</th>
@@ -642,18 +648,18 @@
     </thead>
     <tbody id="tbody">
       <tr class="loading-row">
-        <td colspan="6"><span class="loading-spinner"></span><span class="loading-dots">Carregando</span></td>
+        <td colspan="7"><span class="loading-spinner"></span><span class="loading-dots">Carregando</span></td>
       </tr>
     </tbody>
     <tbody id="tbody-totais">
       <tr class="row-totais">
-        <td colspan="3" class="lbl">TOTAIS</td>
+        <td colspan="4" class="lbl">TOTAIS</td>
         <td class="entrada-total" id="f-total-entrada">R$ 0,00</td>
         <td class="saida-total"  id="f-total-saida">R$ 0,00</td>
         <td class="saldo-total"  id="f-total-saldo">R$ 0,00</td>
       </tr>
       <tr class="row-retencao">
-        <td colspan="5" class="lbl">RETENÇÃO 5% PARADIGMA</td>
+        <td colspan="6" class="lbl">RETENÇÃO 5% PARADIGMA</td>
         <td class="retencao-valor" id="r-retencao">R$ 0,00</td>
       </tr>
     </tbody>
@@ -679,7 +685,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script>
-  const VERSAO = "1.54";
+  const VERSAO = "1.55";
 
   // ── Loading overlay ──────────────────────────────────────
   const _rlMsgs = [
@@ -836,7 +842,7 @@
     _loadingTimer = setTimeout(() => {
       const tbody = document.getElementById('tbody');
       if (tbody && tbody.querySelector('.loading-row')) {
-        tbody.innerHTML = `<tr class="loading-row"><td colspan="6"><span class="loading-spinner" style="border-color:#e65100;border-top-color:transparent"></span><span class="loading-lenta">Rede lenta — aguarde<span class="loading-dots"></span></span></td></tr>`;
+        tbody.innerHTML = `<tr class="loading-row"><td colspan="7"><span class="loading-spinner" style="border-color:#e65100;border-top-color:transparent"></span><span class="loading-lenta">Rede lenta — aguarde<span class="loading-dots"></span></span></td></tr>`;
       }
     }, 5000);
   }
@@ -869,7 +875,7 @@
 
   db.collection("lancamentos").orderBy("criadoEm", "asc").onSnapshot(snap => {
     pararTimerRedeLenta();
-    todosOsDocs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    todosOsDocs = snap.docs.map((d, i) => ({ id: d.id, ...d.data(), numero: i + 1 }));
     atualizaTotaisGlobais();
     aplicarFiltro();
     if (new URLSearchParams(window.location.search).get('autobackup') === '1' && !window._autobackupFeito) {
@@ -932,12 +938,12 @@
 
     const rowAnterior = saldoAnterior !== null ? `
       <tr class="row-saldo-anterior">
-        <td colspan="5" class="sa-label">Saldo Anterior ao Período</td>
+        <td colspan="6" class="sa-label">Saldo Anterior ao Período</td>
         <td class="sa-valor ${saldoAnterior >= 0 ? 'pos' : 'neg'}">${fmt(saldoAnterior)}</td>
       </tr>` : "";
 
     if (docs.length === 0) {
-      tbody.innerHTML = rowAnterior + '<tr class="empty-row"><td colspan="6">Nenhum lançamento no período selecionado.</td></tr>';
+      tbody.innerHTML = rowAnterior + '<tr class="empty-row"><td colspan="7">Nenhum lançamento no período selecionado.</td></tr>';
       document.getElementById("total-registros").textContent = "0 registro(s)";
       atualizaRodape(0, 0, base);
       return;
@@ -969,8 +975,11 @@
         ? `<td class="col-saida-val" style="color:#6a1b9a">⇄ ${fmt(r.saida||0)}</td>`
         : "";
 
+      const numero = String(r.numero).padStart(4, "0");
+
       if (isTransf) {
         return `<tr>
+          <td class="col-numero">${numero}</td>
           <td>${r.data||""}</td>
           <td><span class="badge transf">${r.origem}</span></td>
           <td>${r.descricao||""}</td>
@@ -981,6 +990,7 @@
       }
 
       return `<tr>
+        <td class="col-numero">${numero}</td>
         <td>${r.data||""}</td>
         <td><span class="badge ${badgeCls}">${r.origem}</span></td>
         <td>${r.descricao||""}</td>

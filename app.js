@@ -7,7 +7,7 @@ const firebaseConfig = {
   appId: "1:472820177992:web:2e1b98c9f6ac3a823d0c7d"
 };
 
-const VERSAO_CAIXA = "3.21";
+const VERSAO_CAIXA = "3.22";
 const HORACIO_BASE = -136306.23;
 const JOAO_BASE = -32250;
 document.getElementById("versao-caixa").textContent = "Versão: " + VERSAO_CAIXA;
@@ -134,8 +134,9 @@ function render(docs) {
     return;
   }
 
-  lista.innerHTML = docs.map(doc => {
+  lista.innerHTML = docs.map((doc, i) => {
     const r = doc.data();
+    const numero = String(i + 1).padStart(4, "0");
     const isTransfInter   = r.origem === "ANE->GW-INTER";
     const isTransfHoracio = r.origem === "ANE->HORACIO" || r.origem === "JOAO->HORACIO";
     const isCredito       = r.origem === "JOAO->CREDITO DE PROLABORE";
@@ -153,6 +154,7 @@ function render(docs) {
           <div class="card-valor ${tipo}">${prefix} ${fmtMoeda(valor)}</div>
         </div>
         <div class="card-meta">
+          <span class="numero">Nº ${numero}</span>
           <span>${escHtml(r.data)}</span>
           <span class="badge${isCredito ? ' credito-prolabore' : ''}">${escHtml(r.origem)}</span>
         </div>
